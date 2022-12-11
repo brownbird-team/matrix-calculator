@@ -1,4 +1,4 @@
-#include "matrix.hh"
+#include <matrix.hpp>
 
 using namespace std;
 
