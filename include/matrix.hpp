@@ -1,6 +1,9 @@
 #include <iostream>
 #include <iomanip>
 
+#ifndef INCLUDE_MATRIX_HPP
+#define INCLUDE_MATRIX_HPP
+
 /********************************************************************
  * Matrix kalsa                                                     *
  *                                                                  *
@@ -13,26 +16,26 @@ class matrix {
     private:
         int **mat_ptr;   // Pointer na matricu
     public:
-        int x;           // Broj stupaca
-        int y;           // Broj redova
+        int rows;           // Broj redaka matrica
+        int cols;           // Broj stupaca matrice
 
         // Copy Constructor
         matrix(const matrix &other_mat);
         // Constructor kreira matricu
-        matrix(int dim_x, int dim_y);
+        matrix(int number_rows, int number_cols);
         // Oslobodi memoriju matrice
         ~matrix();
-        // Postavi vrijednost elementa matrice
-        void set(int dim_x, int dim_y, int value);
-        // Zatraži vrijednost elementa matrice
-        int get(int dim_x, int dim_y) const;
+        // Postavi vrijednost elementa matrice u danom retku i stupcu
+        void set(int row, int col, int value);
+        // Zatraži vrijednost elementa matrice u danom retku i stupcu
+        int get(int row, int col) const;
         // Operacija dodjeljivanja
         matrix operator = (const matrix &other_mat) {
             int i, j;
 
-            for (i = 1; i <= y && i <= other_mat.y; i++) {
-                for (j = 1; j <= x && j <= other_mat.x; j++) {
-                    set(j, i, other_mat.get(j, i));
+            for (i = 1; i <= rows && i <= other_mat.rows; i++) {
+                for (j = 1; j <= cols && j <= other_mat.cols; j++) {
+                    set(i, j, other_mat.get(i, j));
                 }
             }
 
@@ -46,14 +49,16 @@ class matrix {
 };
 
 // Zbrajanje dvaju matrica
-matrix operator + (const matrix &a, const matrix &b);
+extern matrix operator + (const matrix &a, const matrix &b);
 // Oduzimanje dvaju matrica
-matrix operator - (const matrix &a, const matrix &b);
+extern matrix operator - (const matrix &a, const matrix &b);
 // Množenje dvaju matrica
-matrix operator * (const matrix &a, const matrix &b);
+extern matrix operator * (const matrix &a, const matrix &b);
 // Množenje skalara matricom
-matrix operator * (const int n, const matrix &b);
+extern matrix operator * (const int n, const matrix &b);
 // Množenje matrice skalarom
-matrix operator * (const matrix &a, const int n);
+extern matrix operator * (const matrix &a, const int n);
 // Ispisivanje matrice u konzolu
-std::ostream &operator << (std::ostream &out_file, const matrix &mat);
+extern std::ostream &operator << (std::ostream &out_file, const matrix &mat);
+
+#endif

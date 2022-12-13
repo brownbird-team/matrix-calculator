@@ -6,30 +6,30 @@ using namespace std;
  * Constructors
  */
 
-matrix::matrix(int dim_x, int dim_y) {
+matrix::matrix(int number_rows, int number_cols) {
     int i;
 
-    x = dim_x;
-    y = dim_y;
+    rows = number_rows;
+    cols = number_cols;
 
-    mat_ptr = new int*[y];
-    for (i = 0; i < y; i++)
-        mat_ptr[i] = new int[x];
+    mat_ptr = new int*[rows];
+    for (i = 0; i < rows; i++)
+        mat_ptr[i] = new int[cols];
 }
 
 matrix::matrix(const matrix &other_mat) {
     int i, j;
 
-    x = other_mat.x;
-    y = other_mat.y;
+    cols = other_mat.cols;
+    rows = other_mat.rows;
 
-    mat_ptr = new int*[y];
-    for (i = 0; i < y; i++)
-        mat_ptr[i] = new int[x];
+    mat_ptr = new int*[rows];
+    for (i = 0; i < rows; i++)
+        mat_ptr[i] = new int[cols];
 
-    for (i = 1; i <= y && i <= other_mat.y; i++) {
-        for (j = 1; j <= x && j <= other_mat.x; j++) {
-            set(j, i, other_mat.get(j, i));
+    for (i = 1; i <= rows && i <= other_mat.rows; i++) {
+        for (j = 1; j <= cols && j <= other_mat.cols; j++) {
+            set(i, j, other_mat.get(i, j));
         }
     }
 }
@@ -37,7 +37,7 @@ matrix::matrix(const matrix &other_mat) {
 matrix::~matrix() {
     int i;
 
-    for (i = 0; i < y; i++)
+    for (i = 0; i < rows; i++)
         delete mat_ptr[i];
     delete mat_ptr;
 }
@@ -46,17 +46,17 @@ matrix::~matrix() {
  * Funkcije za postavljanje i dobivanje elementa matrice
  */
 
-inline void matrix::set(int dim_x, int dim_y, int value) {
-    if (dim_x <= x && dim_y <= y) {
-        mat_ptr[dim_y - 1][dim_x - 1] = value;
+inline void matrix::set(int row, int col, int value) {
+    if (col <= cols && row <= rows) {
+        mat_ptr[row - 1][col - 1] = value;
     } else {
         throw new matrix::element_not_found;
     }
 }
 
-inline int matrix::get(int dim_x, int dim_y) const {
-    if (dim_x <= x && dim_y <= y) {
-        return mat_ptr[dim_y - 1][dim_x - 1];
+inline int matrix::get(int row, int col) const {
+    if (col <= cols && row <= rows) {
+        return mat_ptr[row - 1][col - 1];
     } else {
         throw new matrix::element_not_found;
     }
@@ -66,14 +66,14 @@ inline int matrix::get(int dim_x, int dim_y) const {
  * Operatori za računanje s matricama
  */
 
-inline matrix operator + (const matrix &a, const matrix &b) {
-    if (a.x == b.x && a.y == b.y) {
+matrix operator + (const matrix &a, const matrix &b) {
+    if (a.cols == b.cols && a.rows == b.rows) {
         int i, j;
-        matrix result(a.x, a.y);
+        matrix result(a.cols, a.rows);
 
-        for (i = 1; i <= a.y; i++) {
-            for (j = 1; j <= a.x; j++) {
-                result.set(j, i, a.get(j, i) + b.get(j, i));
+        for (i = 1; i <= a.rows; i++) {
+            for (j = 1; j <= a.cols; j++) {
+                result.set(i, j, a.get(i, j) + b.get(i, j));
             }
         }
         return result;
@@ -82,14 +82,14 @@ inline matrix operator + (const matrix &a, const matrix &b) {
     }
 }
 
-inline matrix operator - (const matrix &a, const matrix &b) {
-    if (a.x == b.x && a.y == b.y) {
+matrix operator - (const matrix &a, const matrix &b) {
+    if (a.cols == b.cols && a.rows == b.rows) {
         int i, j;
-        matrix result(a.x, a.y);
+        matrix result(a.cols, a.rows);
 
-        for (i = 1; i <= a.y; i++) {
-            for (j = 1; j <= a.x; j++) {
-                result.set(j, i, a.get(j, i) - b.get(j, i));
+        for (i = 1; i <= a.rows; i++) {
+            for (j = 1; j <= a.cols; j++) {
+                result.set(i, j, a.get(i, j) - b.get(i, j));
             }
         }
         return result;
@@ -98,20 +98,20 @@ inline matrix operator - (const matrix &a, const matrix &b) {
     }
 }
 
-inline matrix operator * (const matrix &a, const matrix &b) {
-    if (a.x == b.y) {
-        matrix res(a.y, b.x);
+matrix operator * (const matrix &a, const matrix &b) {
+    if (a.cols == b.rows) {
+        matrix res(a.rows, b.cols);
         int i, j, k;
-        int n = a.x;
+        int n = a.cols;
 
-        for (i = 1; i <= res.y; i++) {
-            for (j = 1; j <= res.x; j++) {
+        for (i = 1; i <= res.rows; i++) {
+            for (j = 1; j <= res.cols; j++) {
                 int element = 0;
                 for (k = 1; k <= n; k++) {
-                    element += a.get(k, i) * b.get(j, k);
+                    element += a.get(i, k) * b.get(k, j);
                 }
 
-                res.set(j, i, element);
+                res.set(i, j, element);
             }
         }
 
@@ -121,45 +121,44 @@ inline matrix operator * (const matrix &a, const matrix &b) {
     }
 }
 
-inline matrix operator * (const int n, const matrix &b) {
+matrix operator * (const int n, const matrix &b) {
     int i, j;
-    matrix result(b.x, b.y);
+    matrix result(b.cols, b.rows);
 
-    for (i = 1; i <= b.y; i++) {
-        for (j = 1; j <= b.x; j++) {
-            result.set(j, i, n * b.get(j, i));
+    for (i = 1; i <= b.rows; i++) {
+        for (j = 1; j <= b.cols; j++) {
+            result.set(i, j, n * b.get(i, j));
         }
     }
     return result;
 }
 
-inline matrix operator * (const matrix &a, const int n) {
+matrix operator * (const matrix &a, const int n) {
     try {
-        return n * a;    
+        return n * a;
     } catch (matrix::calculation_error err) {
         throw err;
     }
-    
 }
 
 /*
  * Operator za ispis matrice
  */
 
-inline ostream &operator << (ostream &out_file, const matrix &mat) {
+ostream &operator << (ostream &out_file, const matrix &mat) {
     int i, j;
 
-    cout << "/ " << std::setw(mat.x * 7) << ' ' << " \\\n";
+    cout << "/ " << std::setw(mat.cols * 7) << ' ' << " \\\n";
 
-    for (i = 1; i <= mat.y; i++) {
+    for (i = 1; i <= mat.rows; i++) {
         cout << "| ";
-        for (j = 1; j <= mat.x; j++) {
-            cout << std::setw(6) << mat.get(j, i) << ' ';
+        for (j = 1; j <= mat.cols; j++) {
+            cout << std::setw(6) << mat.get(i, j) << ' ';
         }
         cout << " |\n";
     }
 
-    cout << "\\ " << std::setw(mat.x * 7) << ' ' << " /\n";
+    cout << "\\ " << std::setw(mat.cols * 7) << ' ' << " /\n";
 
     return cout;
 }
