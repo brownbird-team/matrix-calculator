@@ -50,7 +50,7 @@ inline void matrix::set(int row, int col, int value) {
     if (col <= cols && row <= rows) {
         mat_ptr[row - 1][col - 1] = value;
     } else {
-        throw new matrix::element_not_found;
+        throw matrix::element_not_found();
     }
 }
 
@@ -58,7 +58,7 @@ inline int matrix::get(int row, int col) const {
     if (col <= cols && row <= rows) {
         return mat_ptr[row - 1][col - 1];
     } else {
-        throw new matrix::element_not_found;
+        throw matrix::element_not_found();
     }
 }
 
@@ -78,7 +78,7 @@ matrix operator + (const matrix &a, const matrix &b) {
         }
         return result;
     } else {
-        throw new matrix::calculation_error;
+        throw matrix::calculation_error();
     }
 }
 
@@ -94,7 +94,7 @@ matrix operator - (const matrix &a, const matrix &b) {
         }
         return result;
     } else {
-        throw new matrix::calculation_error;
+        throw matrix::calculation_error();
     }
 }
 
@@ -117,7 +117,7 @@ matrix operator * (const matrix &a, const matrix &b) {
 
         return res;
     } else {
-        throw new matrix::calculation_error;
+        throw matrix::calculation_error();
     }
 }
 
