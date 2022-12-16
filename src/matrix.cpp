@@ -125,7 +125,15 @@ inline void matrix::set(int row, int col, double value) {
     if (col <= cols && row <= rows) {
         mat_ptr[row - 1][col - 1] = value;
     } else {
-        throw matrix::element_not_found();
+        throw matrix::element_not_found("Given element doesn't exist");
+    }
+}
+
+inline void matrix::set(int row, int col, int value) {
+    if (col <= cols && row <= rows) {
+        mat_ptr[row - 1][col - 1] = (double)value;
+    } else {
+        throw matrix::element_not_found("Given element doesn't exist");
     }
 }
 
@@ -133,7 +141,7 @@ inline double matrix::get(int row, int col) const {
     if (col <= cols && row <= rows) {
         return mat_ptr[row - 1][col - 1];
     } else {
-        throw matrix::element_not_found();
+        throw matrix::element_not_found("Given element doesn't exist");
     }
 }
 
@@ -164,7 +172,7 @@ matrix operator + (const matrix &a, const matrix &b) {
         }
         return result;
     } else {
-        throw matrix::calculation_error();
+        throw matrix::calculation_error("Matrices must have same number of rows and cols when added");
     }
 }
 
@@ -180,7 +188,7 @@ matrix operator - (const matrix &a, const matrix &b) {
         }
         return result;
     } else {
-        throw matrix::calculation_error();
+        throw matrix::calculation_error("Matrices must have same number of rows and cols when subtracted");
     }
 }
 
@@ -203,7 +211,7 @@ matrix operator * (const matrix &a, const matrix &b) {
 
         return res;
     } else {
-        throw matrix::calculation_error();
+        throw matrix::calculation_error("Matrices must be chained in order to be multiplied");
     }
 }
 

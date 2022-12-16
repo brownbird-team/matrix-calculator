@@ -12,6 +12,9 @@
  * množenje matrica skalarom                                        *
  ********************************************************************/
 
+// Maksimalna duljina opisa greške parser varijable
+#define MAX_MATRIX_ERR_DESC 70
+
 class matrix {
     private:
         double **mat_ptr;   // Pointer na matricu
@@ -27,6 +30,8 @@ class matrix {
         ~matrix();
         // Postavi vrijednost elementa matrice u danom retku i stupcu
         void set(int row, int col, double value);
+        // Podrška za int value u setu
+        void set(int row, int col, int value);
         // Zatraži vrijednost elementa matrice u danom retku i stupcu
         double get(int row, int col) const;
         // Transponira matricu
@@ -60,10 +65,33 @@ class matrix {
             return *this;
         }
 
+        // Općenito greška vezana uz matrix
+        class error {
+            private:
+                char description[MAX_MATRIX_ERR_DESC];
+            public:
+                error(const char desc[]) {
+                    int i;
+                    for (i = 0; desc[i] != '\0' && i < MAX_MATRIX_ERR_DESC - 1; i++)
+                        description[i] = desc[i];
+                    description[i] = '\0';
+                }
+                inline const char * info() const {
+                    return description;
+                }
+        };
+
         // Došlo je do greške pri računanju sa danim matricama
-        class calculation_error {};
+        class calculation_error : public error {
+            public:
+                calculation_error(const char desc[]) : error(desc) {}
+        };
+
         // Traženi element ne postoji u matrici
-        class element_not_found {};
+        class element_not_found : public error {
+            public:
+                element_not_found(const char desc[]) : error(desc) {}
+        };
 };
 
 // Zbrajanje dvaju matrica
