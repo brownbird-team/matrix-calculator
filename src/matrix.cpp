@@ -12,9 +12,9 @@ matrix::matrix(int number_rows, int number_cols) {
     rows = number_rows;
     cols = number_cols;
 
-    mat_ptr = new int*[rows];
+    mat_ptr = new double*[rows];
     for (i = 0; i < rows; i++)
-        mat_ptr[i] = new int[cols];
+        mat_ptr[i] = new double[cols];
 }
  int matrix::is_squared(){
     return rows==cols;
@@ -98,9 +98,9 @@ matrix::matrix(const matrix &other_mat) {
     cols = other_mat.cols;
     rows = other_mat.rows;
 
-    mat_ptr = new int*[rows];
+    mat_ptr = new double*[rows];
     for (i = 0; i < rows; i++)
-        mat_ptr[i] = new int[cols];
+        mat_ptr[i] = new double[cols];
 
     for (i = 1; i <= rows && i <= other_mat.rows; i++) {
         for (j = 1; j <= cols && j <= other_mat.cols; j++) {
@@ -121,7 +121,7 @@ matrix::~matrix() {
  * Funkcije za postavljanje i dobivanje elementa matrice
  */
 
-inline void matrix::set(int row, int col, int value) {
+inline void matrix::set(int row, int col, double value) {
     if (col <= cols && row <= rows) {
         mat_ptr[row - 1][col - 1] = value;
     } else {
@@ -129,12 +129,23 @@ inline void matrix::set(int row, int col, int value) {
     }
 }
 
-inline int matrix::get(int row, int col) const {
+inline double matrix::get(int row, int col) const {
     if (col <= cols && row <= rows) {
         return mat_ptr[row - 1][col - 1];
     } else {
         throw matrix::element_not_found();
     }
+}
+
+matrix matrix::trans() const {
+    int i, j;
+    matrix transp(cols, rows);
+    for(i = 1; i <= rows; i++) {
+        for(j = 1; j <= cols; j++) {
+            transp.set(i, j, get(j, i));
+        }
+    }
+    return transp;
 }
 
 /*

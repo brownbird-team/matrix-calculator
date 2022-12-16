@@ -14,7 +14,7 @@
 
 class matrix {
     private:
-        int **mat_ptr;   // Pointer na matricu
+        double **mat_ptr;   // Pointer na matricu
     public:
         int rows;           // Broj redaka matrica
         int cols;           // Broj stupaca matrice
@@ -26,9 +26,11 @@ class matrix {
         // Oslobodi memoriju matrice
         ~matrix();
         // Postavi vrijednost elementa matrice u danom retku i stupcu
-        void set(int row, int col, int value);
+        void set(int row, int col, double value);
         // Zatraži vrijednost elementa matrice u danom retku i stupcu
-        int get(int row, int col) const;
+        double get(int row, int col) const;
+        // Transponira matricu
+        matrix trans() const;
         //Provjera je li matrica kvadratna
         int is_squared();
         //Provjerava je li nul matrica
@@ -71,9 +73,9 @@ extern matrix operator - (const matrix &a, const matrix &b);
 // Množenje dvaju matrica
 extern matrix operator * (const matrix &a, const matrix &b);
 // Množenje skalara matricom
-extern matrix operator * (const int n, const matrix &b);
+extern matrix operator * (const double n, const matrix &b);
 // Množenje matrice skalarom
-extern matrix operator * (const matrix &a, const int n);
+extern matrix operator * (const matrix &a, const double n);
 // Ispisivanje matrice u konzolu
 extern std::ostream &operator << (std::ostream &out_file, const matrix &mat);
 

@@ -21,6 +21,8 @@ int main() {
 
     matrix matA(3, 3);
 
+    matrix matA(2, 2);
+
     matA.set(1, 1, 0);
     matA.set(1, 2, -3);
     matA.set(1, 3, 4);
@@ -30,6 +32,8 @@ int main() {
     matA.set(3, 1, 4);
     matA.set(3, 2, 0);
     matA.set(3, 3, 4);
+    matA.set(2, 2, 4);
+    
     cout << "--- Hello it seems to be working ----\n\n";
     cout << "Matrica: \n" << pvar.mat();
 
@@ -44,6 +48,8 @@ int main() {
 
     
     pvar.mat(matA);
+    
+    pvar.mat(matA);
     cout << "Matrica dodjeljena varijablom: \n" << pvar.mat();
 
     cout << matA.is_squared() << "\n";
@@ -54,4 +60,5 @@ int main() {
     cout << matA.is_simetrical() << "\n";
     cout << matA.is_antisimetrical() << "\n";
     
+    cout << "Matrica dodjeljena varijablom: \n" << matA.trans();
 }
