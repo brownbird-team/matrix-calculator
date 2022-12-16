@@ -16,6 +16,81 @@ matrix::matrix(int number_rows, int number_cols) {
     for (i = 0; i < rows; i++)
         mat_ptr[i] = new int[cols];
 }
+ int matrix::is_squared(){
+    return rows==cols;
+}
+ int matrix::is_simetrical(){
+    int rez=1;
+    for(int i=0; i<rows; i++){
+        for(int j=0; j<cols; j++){
+            if(mat_ptr[i][j]!=mat_ptr[j][i]){
+                rez=0;
+            }
+        }
+    }
+    return rez;
+}
+int matrix::is_antisimetrical(){
+    int rez=1;
+    for(int i=0; i<rows; i++){
+        for(int j=0; j<cols; j++){
+            if(mat_ptr[i][j]!=-mat_ptr[j][i]){
+                rez=0;
+            }
+        }
+    }
+    return rez;
+}
+int matrix::is_diagonal(){
+    return is_upper_triangular() && is_lower_triangular();
+}
+int matrix::is_lower_triangular(){
+    int rez=1;
+    for(int i=0; i<rows; i++){
+        for(int j=0; j<cols; j++){
+            if(mat_ptr[i][j]!=0 && i<j){
+                rez=0;
+            }
+        }
+    }
+    return rez && is_squared();
+}
+int matrix::is_upper_triangular(){
+    int rez=1;
+    for(int i=0; i<rows; i++){
+        for(int j=0; j<cols; j++){
+            if(mat_ptr[i][j]!=0 && i>j){
+                rez=0;
+            }
+        }
+    }
+    return rez && is_squared();
+}
+ int matrix::is_identity(){
+    int rez=1;
+    for(int i=0; i<rows; i++){
+        for(int j=0; j<cols; j++){
+            if(mat_ptr[i][j]!=1 && i==j){
+                rez=0;
+            }
+            if(mat_ptr[i][j]!=0 && i!=j){
+                rez=0;
+            }
+        }
+    }
+    return rez && is_squared();
+}
+ int matrix::is_nul(){
+    int rez=1;
+    for(int i=0; i<rows; i++){
+        for(int j=0; j<cols; j++){
+            if(mat_ptr[i][j]!=0){
+                rez=0;
+            }
+        }
+    }
+    return rez;
+}
 
 matrix::matrix(const matrix &other_mat) {
     int i, j;
