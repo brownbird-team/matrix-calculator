@@ -15,7 +15,8 @@ matrix::data matrix::analize_matrix(){
     matrix_data.diagonal=is_diagonal();
     matrix_data.simetrical=is_simetrical();
     matrix_data.antisimetrical=is_antisimetrical();
-    matrix_data.ortogonal=is_ortogonal;
+    matrix_data.ortogonal=is_ortogonal();
+    return matrix_data;
 }
 matrix::matrix(int number_rows, int number_cols) {
     int i;

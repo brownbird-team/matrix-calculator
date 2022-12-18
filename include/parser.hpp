@@ -188,7 +188,7 @@ class parser_var {
             opr_code = operator_code;
         }
         // Postavi tip varijable na operator i u nju spremi operator danog stringa
-        inline int opr()
+        inline int opr();
         // Postavi tip varijable na matricu i kopiraj dani objekt matrice u nju
         inline matrix &mat(const matrix &matrix_object) {
             switch(var_type) {

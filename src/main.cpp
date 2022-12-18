@@ -65,8 +65,9 @@ int main() {
     cout << matA.is_simetrical() << "\n";
     cout << matA.is_antisimetrical() << "\n";
     cout << matA.is_ortogonal() << "\n";
+    cout << "Kvadratna " << matA.analize_matrix().square << "\n";
     cout << "---------------------" << "\n";
-    
+  /*  
     cout << "Matrica dodjeljena varijablom: \n" << matA.trans();
 
     cout << "------------- Testiranje parser vara -------------\n";
@@ -83,5 +84,5 @@ int main() {
 
     parvar = parvar * 2;
 
-    cout << "Matrica * 2:\n" << parvar.mat();
+    cout << "Matrica * 2:\n" << parvar.mat();*/
 }
