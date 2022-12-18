@@ -19,7 +19,9 @@ int main() {
         return 0;
     }
 
-    matrix matA(3, 3);
+
+*/
+  /*  matrix matA(3, 3);
     matA.set(1, 1, 0);
     matA.set(1, 2, -3);
     matA.set(1, 3, 4);
