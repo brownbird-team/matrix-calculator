@@ -52,6 +52,23 @@ class matrix {
         int is_simetrical();
         //Provjerava je li antisimetricna
         int is_antisimetrical();
+        //Provjerava je li ortogonalna
+        int is_ortogonal();
+        class data{
+            public:
+                int square;
+                int nul;
+                int identity;
+                int upper_triangular;
+                int lower_triangular;
+                int diagonal;
+                int simetrical;
+                int antisimetrical;
+                int ortogonal;
+
+                
+        };
+        data analize_matrix();
         // Operacija dodjeljivanja
         matrix operator = (const matrix &other_mat) {
             int i, j;

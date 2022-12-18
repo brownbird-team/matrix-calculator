@@ -5,7 +5,18 @@ using namespace std;
 /*
  * Constructors
  */
-
+matrix::data matrix::analize_matrix(){
+    data matrix_data;
+    matrix_data.square=is_squared();
+    matrix_data.nul=is_nul();
+    matrix_data.identity=is_identity();
+    matrix_data.upper_triangular=is_upper_triangular();
+    matrix_data.lower_triangular=is_lower_triangular();
+    matrix_data.diagonal=is_diagonal();
+    matrix_data.simetrical=is_simetrical();
+    matrix_data.antisimetrical=is_antisimetrical();
+    matrix_data.ortogonal=is_ortogonal;
+}
 matrix::matrix(int number_rows, int number_cols) {
     int i;
 
@@ -18,6 +29,9 @@ matrix::matrix(int number_rows, int number_cols) {
 }
  int matrix::is_squared(){
     return rows==cols;
+}
+int matrix::is_ortogonal(){
+    return ((*this)*trans()).is_identity() && (trans()*(*this)).is_identity(); 
 }
  int matrix::is_simetrical(){
     int rez=1;
@@ -215,7 +229,7 @@ matrix operator * (const matrix &a, const matrix &b) {
     }
 }
 
-matrix operator * (const int n, const matrix &b) {
+matrix operator * (const double n, const matrix &b) {
     int i, j;
     matrix result(b.cols, b.rows);
 
@@ -227,7 +241,7 @@ matrix operator * (const int n, const matrix &b) {
     return result;
 }
 
-matrix operator * (const matrix &a, const int n) {
+matrix operator * (const matrix &a, const double n) {
     try {
         return n * a;
     } catch (matrix::calculation_error err) {

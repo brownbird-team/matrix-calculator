@@ -2,6 +2,41 @@
 #define INCLUDE_PARSER_HPP
 
 #include <matrix.hpp>
+#include <iostream>
+
+class parser_operator {
+    public:
+        int id;
+        char character;
+
+        parser_operator(const int oper_id, const char oper_char) {
+            int i;
+            id = oper_id;
+            character = oper_char;
+        }
+        parser_operator(const parser_operator &other_oper) {
+            int i;
+            id = other_oper.id;
+            character = other_oper.character;
+        }
+};
+
+// Kodovi operatora parser varijable
+#define PARSER_OPERATOR_ADD   0         // Zbrajanje operanata
+#define PARSER_OPERATOR_SUB   1         // Oduzimanje operanata
+#define PARSER_OPERATOR_MUL   2         // Množenje operanata
+#define PARSER_OPERATOR_DIV   3         // Dijeljenje operanata
+#define PARSER_OPERATOR_EXP   4         // Drugi operant je eksponent prvog
+
+// Definiraj znak svakog od operatora
+const parser_operator parser_operators[] {
+    parser_operator(PARSER_OPERATOR_ADD, '+'),
+    parser_operator(PARSER_OPERATOR_SUB, '-'),
+    parser_operator(PARSER_OPERATOR_MUL, '*'),
+    parser_operator(PARSER_OPERATOR_DIV, '/'),
+    parser_operator(PARSER_OPERATOR_EXP, '^')
+};
+
 
 /*******************************************************************************
  * Parser variable (parser_var) class                                          *
@@ -88,10 +123,14 @@
 #define PARSER_VAR_UNDEFINED  0
 #define PARSER_VAR_NUMBER     1
 #define PARSER_VAR_MATRIX     2
+#define PARSER_VAR_FUNCTION   3
+#define PARSER_VAR_OPERATOR   4
 
 class parser_var {
     private:
         int var_type;         // Tip podatka pohranjenog u varijabli undefined/matrica/broj
+        int opr_code;         // Kod operatora ako je pohranjen
+        int fun_code;         // Kod funkcije ako je pohranjena
         double *number_part;  // Pointer na broj ako je pohranjen
         matrix *matrix_part;  // Pointer na matricu ako je pohranjena
     protected:
@@ -109,8 +148,14 @@ class parser_var {
         parser_var(const parser_var &other_parser_var) {
             next_var = other_parser_var.next_var;
             var_type = other_parser_var.var_type;
-            number_part = other_parser_var.number_part;
-            matrix_part = other_parser_var.matrix_part;
+            switch(var_type) {
+                case PARSER_VAR_MATRIX:
+                    mat(*other_parser_var.matrix_part);
+                    break;
+                case PARSER_VAR_NUMBER:
+                    num(*other_parser_var.number_part);
+                    break;
+            }
         }
         // Destructor
         ~parser_var() {
@@ -127,6 +172,23 @@ class parser_var {
         inline int is_defined() const {
             return (var_type != PARSER_VAR_UNDEFINED) ? 1 : 0;
         }
+        // Postavi tip varijable na operator i kopiraj dani operator u varijablu
+        inline int opr(const int operator_code) {
+            switch(var_type) {
+                case PARSER_VAR_NUMBER:
+                    delete number_part;
+                    number_part = NULL;
+                    break;
+                case PARSER_VAR_MATRIX:
+                    delete matrix_part;
+                    matrix_part = NULL;
+                    break;
+            }
+            var_type = PARSER_VAR_OPERATOR;
+            opr_code = operator_code;
+        }
+        // Postavi tip varijable na operator i u nju spremi operator danog stringa
+        inline int opr()
         // Postavi tip varijable na matricu i kopiraj dani objekt matrice u nju
         inline matrix &mat(const matrix &matrix_object) {
             switch(var_type) {
@@ -223,11 +285,16 @@ class parser_var {
         };
 
         // Definicija operatora dodjeljivanja
-        inline parser_var operator = (const parser_var &other_parser_var) {
+        parser_var &operator = (const parser_var &other_parser_var) {
             var_type = other_parser_var.var_type;
-            matrix_part = other_parser_var.matrix_part;
-            number_part = other_parser_var.number_part;
-
+            switch(var_type) {
+                case PARSER_VAR_MATRIX:
+                    mat(*other_parser_var.matrix_part);
+                    break;
+                case PARSER_VAR_NUMBER:
+                    num(*other_parser_var.number_part);
+                    break;
+            }
             return *this;
         }
 
@@ -238,23 +305,20 @@ class parser_var {
 
 // Prototipi operatora +
 extern parser_var operator + (const parser_var &a, const parser_var &b);
-extern parser_var operator + (const parser_var &a, const int n);
-extern parser_var operator + (const int n, const parser_var &a);
+extern parser_var operator + (const parser_var &a, const double n);
+extern parser_var operator + (const double n, const parser_var &a);
 // Prototipi operatora -
 extern parser_var operator - (const parser_var &a, const parser_var &b);
-extern parser_var operator - (const parser_var &a, const int n);
-extern parser_var operator - (const int n, const parser_var &a);
+extern parser_var operator - (const parser_var &a, const double n);
+extern parser_var operator - (const double n, const parser_var &a);
 // Prototipi operatora *
 extern parser_var operator * (const parser_var &a, const parser_var &b);
-extern parser_var operator * (const parser_var &a, const int n);
-extern parser_var operator * (const int n, const parser_var &a);
+extern parser_var operator * (const parser_var &a, const double n);
+extern parser_var operator * (const double n, const parser_var &a);
 // Prototipi operatora /
 extern parser_var operator / (const parser_var &a, const parser_var &b);
-extern parser_var operator / (const parser_var &a, const int n);
-extern parser_var operator / (const int n, const parser_var &a);
-// Prototipi operatora ^
-extern parser_var operator ^ (const parser_var &a, const char exponent);
-extern parser_var operator ^ (const parser_var &a, const int exponent);
+extern parser_var operator / (const parser_var &a, const double n);
+extern parser_var operator / (const double n, const parser_var &a);
 
 
 /*

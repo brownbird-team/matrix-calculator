@@ -183,6 +183,8 @@ matrix &parser_var::mat(const char matrix_string[]) {
             i = end_ptr - matrix_string - 1;
         }
     }
+
+    return *matrix_part;
 }
 
 double parser_var::num(const char num_string[]) {
@@ -194,52 +196,202 @@ double parser_var::num(const char num_string[]) {
 }
 
 parser_var operator + (const parser_var &a, const parser_var &b) {
-    
-}
-parser_var operator + (const parser_var &a, const int n) {
+    parser_var result; // Rezultat izračuna
 
-}
-parser_var operator + (const int n, const parser_var &a) {
+    // Ako je a matrica i b matrica
+    if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
+        try {
+            result.mat(a.mat() + b.mat());
+        } catch (matrix::calculation_error err) {
+            throw parser_var::error_calculation(err.info());
+        }
+    }
+    // Ako je a skalar i b skalar
+    else if (a.type() == PARSER_VAR_NUMBER && b.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() + b.num());
+    }
+    // Ako su varijable različitih tipova ili je jedna od njih undefined
+    else {
+        throw parser_var::error_calculation("It's impossible to ADD variables of different types");
+    }
 
+    return result;
+}
+parser_var operator + (const parser_var &a, const double n) {
+    parser_var result; // Rezultat izračuna
+
+    // Ako je a skalar i n je skalar (double)
+    if (a.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() + n); 
+    }
+    // Ako je a bilo što osim broja
+    else {
+        throw parser_var::error_calculation("Number can only be added to a number");
+    }
+
+    return result;
+}
+parser_var operator + (const double n, const parser_var &a) {
+    try {
+        return a + n;
+    } catch (parser_var::error_calculation err) {
+        throw err;
+    }
 }
 
 
 parser_var operator - (const parser_var &a, const parser_var &b) {
+    parser_var result; // Rezultat izračuna
 
+    // Ako je a matrica i b matrica
+    if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
+        try {
+            result.mat(a.mat() - b.mat());
+        } catch (matrix::calculation_error err) {
+            throw parser_var::error_calculation(err.info());
+        }
+    }
+    // Ako je a skalar i b skalar
+    else if (a.type() == PARSER_VAR_NUMBER && b.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() - b.num());
+    }
+    // Ako su varijable različitih tipova ili je jedna od njih undefined
+    else {
+        throw parser_var::error_calculation("It's impossible to SUBTRACT variables of different types");
+    }
+
+    return result;
 }
-parser_var operator - (const parser_var &a, const int n) {
+parser_var operator - (const parser_var &a, const double n) {
+    parser_var result; // Rezultat izračuna
 
+    // Ako je a skalar i n je skalar (double)
+    if (a.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() - n);
+    }
+    // Ako je a bilo što osim broja
+    else {
+        throw parser_var::error_calculation("Number can only be subracted by a number");
+    }
+
+    return result;
 }
-parser_var operator - (const int n, const parser_var &a) {
-
+parser_var operator - (const double n, const parser_var &a) {
+    try {
+        return a - n;
+    } catch (parser_var::error_calculation err) {
+        throw err;
+    }
 }
 
 
 parser_var operator * (const parser_var &a, const parser_var &b) {
+    parser_var result; // Rezultat izračuna
 
+    // Ako je a matrica i b matrica
+    if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
+        try {
+            result.mat(a.mat());
+        } catch (matrix::calculation_error err) {
+            throw parser_var::error_calculation(err.info());
+        }
+    }
+    // Ako je a matrica i b skalar
+    else if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_NUMBER) {
+        result.mat(a.mat() * b.num());
+    }
+    // Ako je a matrica i b skalar
+    else if (a.type() == PARSER_VAR_NUMBER && b.type() == PARSER_VAR_MATRIX) {
+        result.mat(a.num() * b.mat());
+    }
+    // Ako je a skalar i b skalar
+    else if (a.type() == PARSER_VAR_NUMBER && b.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() * b.num());
+    }
+    // Jedna matrica je nedefinirana
+    else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
+
+    return result;
 }
-parser_var operator * (const parser_var &a, const int n) {
+parser_var operator * (const parser_var &a, const double n) {
+    parser_var result; // Rezultat izračuna
 
+    // Ako je a matrica
+    if (a.type() == PARSER_VAR_MATRIX) {
+        result.mat(a.mat() * n);
+    }
+    // Ako je a broj
+    else if (a.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() * n);
+    }
+    else {
+        throw parser_var::error_calculation("Variable is undefined");
+    } 
+
+    return result;
 }
-parser_var operator * (const int n, const parser_var &a) {
-
+parser_var operator * (const double n, const parser_var &a) {
+    try {
+        return a * n;
+    } catch (parser_var::error_calculation err) {
+        throw err;
+    }
 }
 
 
 parser_var operator / (const parser_var &a, const parser_var &b) {
+    parser_var result; // Rezultat izračuna
 
+    // Ako netko pokušava podijeliti matrice javi grešku
+    if (a.type() == PARSER_VAR_MATRIX || b.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrices can't be divided");
+    }
+    // Ako su oba broj nastavi
+    else if (a.type() == PARSER_VAR_NUMBER && b.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() / b.num());
+    }
+    // Jedna matrica je nedefinirana
+    else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
+
+    return result;
 }
-parser_var operator / (const parser_var &a, const int n) {
+parser_var operator / (const parser_var &a, const double n) {
+    parser_var result; // Rezultat izračuna
 
+    // Ako netko pokušava podijeliti matrice javi grešku
+    if (a.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrices can't be divided");
+    }
+    // Ako su oba broj nastavi
+    else if (a.type() == PARSER_VAR_NUMBER) {
+        result.num(a.num() / n);
+    }
+    // Jedna matrica je nedefinirana
+    else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
+
+    return result;
 }
-parser_var operator / (const int n, const parser_var &a) {
+parser_var operator / (const double n, const parser_var &a) {
+    parser_var result; // Rezultat izračuna
 
-}
+    // Ako netko pokušava podijeliti matrice javi grešku
+    if (a.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrices can't be divided");
+    }
+    // Ako su oba broj nastavi
+    else if (a.type() == PARSER_VAR_NUMBER) {
+        result.num(n / a.num());
+    }
+    // Jedna matrica je nedefinirana
+    else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
 
-
-parser_var operator ^ (const parser_var &a, const char exponent) {
-
-}
-parser_var operator ^ (const parser_var &a, const int exponent) {
-
+    return result;
 }
