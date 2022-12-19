@@ -1,6 +1,8 @@
 #include <parser.hpp>
 #include <matrix.hpp>
 #include <iostream>
+#include <string.h>
+#include <ctype.h>
 
 /*******************************************************************************
  * number_parse -- pretvorba niza znakova koji predstavlja broj u double broj  *
@@ -33,11 +35,10 @@ double number_parse(const char string[], const char *string_end) {
         if (!prefix_set) {
             if (string[i] == '-') {
                 prefix *= -1;
-                prefix_set = 1;
                 continue;
             }
             else if (string[i] == '+') {
-                prefix_set = 1;
+                // Do nothing
                 continue;
             }
         }
@@ -55,6 +56,7 @@ double number_parse(const char string[], const char *string_end) {
                 result += (string[i] - '0') / (double)decimal_divider;
                 decimal_divider *= 10;
             }
+            prefix_set = 1;
             continue;
         }
         // Ako znak nije ništa od navedenog, neš ne valja
@@ -198,6 +200,17 @@ double parser_var::num(const char num_string[]) {
 parser_var operator + (const parser_var &a, const parser_var &b) {
     parser_var result; // Rezultat izračuna
 
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (
+        a.type() == PARSER_VAR_OPERATOR ||
+        a.type() == PARSER_VAR_FUNCTION ||
+        b.type() == PARSER_VAR_OPERATOR ||
+        b.type() == PARSER_VAR_FUNCTION
+    ) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
     // Ako je a matrica i b matrica
     if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
         try {
@@ -219,6 +232,12 @@ parser_var operator + (const parser_var &a, const parser_var &b) {
 }
 parser_var operator + (const parser_var &a, const double n) {
     parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
 
     // Ako je a skalar i n je skalar (double)
     if (a.type() == PARSER_VAR_NUMBER) {
@@ -243,6 +262,17 @@ parser_var operator + (const double n, const parser_var &a) {
 parser_var operator - (const parser_var &a, const parser_var &b) {
     parser_var result; // Rezultat izračuna
 
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (
+        a.type() == PARSER_VAR_OPERATOR ||
+        a.type() == PARSER_VAR_FUNCTION ||
+        b.type() == PARSER_VAR_OPERATOR ||
+        b.type() == PARSER_VAR_FUNCTION
+    ) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
     // Ako je a matrica i b matrica
     if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
         try {
@@ -264,6 +294,12 @@ parser_var operator - (const parser_var &a, const parser_var &b) {
 }
 parser_var operator - (const parser_var &a, const double n) {
     parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
 
     // Ako je a skalar i n je skalar (double)
     if (a.type() == PARSER_VAR_NUMBER) {
@@ -287,6 +323,17 @@ parser_var operator - (const double n, const parser_var &a) {
 
 parser_var operator * (const parser_var &a, const parser_var &b) {
     parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (
+        a.type() == PARSER_VAR_OPERATOR ||
+        a.type() == PARSER_VAR_FUNCTION ||
+        b.type() == PARSER_VAR_OPERATOR ||
+        b.type() == PARSER_VAR_FUNCTION
+    ) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
 
     // Ako je a matrica i b matrica
     if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
@@ -318,6 +365,12 @@ parser_var operator * (const parser_var &a, const parser_var &b) {
 parser_var operator * (const parser_var &a, const double n) {
     parser_var result; // Rezultat izračuna
 
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
     // Ako je a matrica
     if (a.type() == PARSER_VAR_MATRIX) {
         result.mat(a.mat() * n);
@@ -344,6 +397,17 @@ parser_var operator * (const double n, const parser_var &a) {
 parser_var operator / (const parser_var &a, const parser_var &b) {
     parser_var result; // Rezultat izračuna
 
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (
+        a.type() == PARSER_VAR_OPERATOR ||
+        a.type() == PARSER_VAR_FUNCTION ||
+        b.type() == PARSER_VAR_OPERATOR ||
+        b.type() == PARSER_VAR_FUNCTION
+    ) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
     // Ako netko pokušava podijeliti matrice javi grešku
     if (a.type() == PARSER_VAR_MATRIX || b.type() == PARSER_VAR_MATRIX) {
         throw parser_var::error_calculation("Matrices can't be divided");
@@ -361,6 +425,12 @@ parser_var operator / (const parser_var &a, const parser_var &b) {
 }
 parser_var operator / (const parser_var &a, const double n) {
     parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
 
     // Ako netko pokušava podijeliti matrice javi grešku
     if (a.type() == PARSER_VAR_MATRIX) {
@@ -380,6 +450,12 @@ parser_var operator / (const parser_var &a, const double n) {
 parser_var operator / (const double n, const parser_var &a) {
     parser_var result; // Rezultat izračuna
 
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
     // Ako netko pokušava podijeliti matrice javi grešku
     if (a.type() == PARSER_VAR_MATRIX) {
         throw parser_var::error_calculation("Matrices can't be divided");
@@ -394,4 +470,428 @@ parser_var operator / (const double n, const parser_var &a) {
     }
 
     return result;
+}
+
+
+
+parser_var &parser::variable(const char name[])  {
+    parser_var *var_ptr = variables;
+
+    // Ako već postoji varijabla sa danim imenom vrati referencu na nju
+    while (1) {
+        if (var_ptr == NULL)
+            break;
+        if (!strcmp(name, var_ptr->variable_name))
+            return *var_ptr;
+
+        var_ptr = var_ptr->next_var;
+    }
+    
+    // Ako varijabla ne postoji kreiraj je i vrati referencu na nju
+    var_ptr = variables;
+    while (1) {
+        if (variables == NULL) {
+            variables = new parser_var;
+            variables->variable_name = new char[strlen(name)];
+            strcpy(variables->variable_name, name);
+            return *variables;
+        } else if (var_ptr->next_var == NULL) {
+            var_ptr->next_var = new parser_var;
+            var_ptr->next_var->variable_name = new char[strlen(name)];
+            strcpy(var_ptr->next_var->variable_name, name);
+            return *var_ptr->next_var;
+        }
+        var_ptr = var_ptr->next_var;
+    }
+}
+
+void parser::del_variable(const char name[]) {
+    parser_var *var_ptr = variables;
+
+    // Ako je prva varijabla ona koju treba obrisati
+    if (!strcmp(name, variables->variable_name)) {
+        parser_var *temp_ptr = variables;
+        variables = variables->next_var;
+        delete temp_ptr;
+        return;
+    }
+    // Ako nije prva nastavljamo dalje tražeći onu koju treba obrisati
+    while (1) {
+        // Ako je nismo našli ništa
+        if (var_ptr->next_var == NULL)
+            break;
+        // Ako je sljedeća varijabla tražena
+        if (!strcmp(name, var_ptr->next_var->variable_name)) {
+            parser_var *temp_ptr = var_ptr->next_var;
+            var_ptr->next_var = var_ptr->next_var->next_var;
+            delete temp_ptr;
+            return;
+        }
+        var_ptr = var_ptr->next_var;
+    }
+}
+
+int parser::length() {
+    int counter = 0;
+    parser_var *var_ptr = variables;
+
+    while (1) {
+        if (var_ptr == NULL)
+            return counter;
+        ++counter;
+        var_ptr = var_ptr->next_var;
+    }
+}
+
+parser_var &parser::operator [] (int index) {
+    int counter = 0;
+    parser_var *var_ptr = variables;
+
+    while (1) {
+        if (var_ptr == NULL)
+            throw error_undefined("Specified element does not exist");
+        if (counter == index)
+            return *var_ptr;
+        var_ptr = var_ptr->next_var;
+    }
+}
+
+/*
+ * Privatne funkcije za upravljanje stackom i queueom za calculate funkciju
+ */
+
+parser_var *parser::add_to_stack(const int operator_code) {
+    parser_var *temp_ptr = operator_stack;
+    operator_stack = new parser_var;
+    operator_stack->next_var = temp_ptr;
+    operator_stack->var_type = PARSER_VAR_OPERATOR;
+    operator_stack->opr_code = operator_code;
+    return operator_stack;
+}
+parser_var *parser::pop_from_stack() {
+    if (operator_stack == NULL) {
+        return NULL;
+    } else {
+        parser_var *pop_result = operator_stack;
+        operator_stack = operator_stack->next_var;
+        return pop_result;
+    }
+}
+parser_var *parser::pop_from_queue() {
+    if (output_queue == NULL) {
+        return NULL;
+    } else {
+        parser_var *pop_result = output_queue;
+        output_queue = output_queue->next_var;
+        return pop_result;
+    }
+}
+parser_var *parser::add_operator_to_queue(const int operator_code) {
+    parser_var *var_ptr = output_queue;
+    // Ako je queue prazan dodaj prvi element
+    if (output_queue == NULL) {
+        output_queue = new parser_var;
+        output_queue->var_type = PARSER_VAR_OPERATOR;
+        output_queue->opr_code = operator_code;
+    // Ako queue nije prazan nađi kraj queuea i stavi ga tam
+    } else {
+        while (1) {
+            if (var_ptr->next_var == NULL) {
+                var_ptr->next_var = new parser_var;
+                var_ptr->next_var->var_type = PARSER_VAR_OPERATOR;
+                var_ptr->next_var->opr_code = operator_code;
+                break;
+            }
+            var_ptr = var_ptr->next_var;
+        }
+    }
+    return output_queue;
+}
+parser_var *parser::add_function_to_queue(const int function_code) {
+    parser_var *var_ptr = output_queue;
+    // Ako je queue prazan dodaj prvi element
+    if (output_queue == NULL) {
+        output_queue = new parser_var;
+        output_queue->var_type = PARSER_VAR_FUNCTION;
+        output_queue->opr_code = function_code;
+    // Ako queue nije prazan nađi kraj queuea i stavi ga tam
+    } else {
+        while (1) {
+            if (var_ptr->next_var == NULL) {
+                var_ptr->next_var = new parser_var;
+                var_ptr->next_var->var_type = PARSER_VAR_FUNCTION;
+                var_ptr->next_var->opr_code = function_code;
+                break;
+            }
+            var_ptr = var_ptr->next_var;
+        }
+    }
+    return output_queue;
+}
+parser_var *parser::add_variable_to_queue(parser_var *new_var_ptr) {
+    parser_var *var_ptr = output_queue;
+    // Ako je queue prazan dodaj prvi element
+    if (output_queue == NULL) {
+        output_queue = new_var_ptr;
+    // Ako queue nije prazan nađi kraj queuea i stavi ga tam
+    } else {
+        while (1) {
+            if (var_ptr->next_var == NULL) {
+                var_ptr->next_var = new_var_ptr;
+                var_ptr->next_var->next_var = NULL;
+                break;
+            }
+            var_ptr = var_ptr->next_var;
+        }
+    }
+    return output_queue;
+}
+
+
+
+
+
+parser_var *parser::find_variable(const char *name, const char *name_end) {
+    parser_var *var_ptr = variables;
+
+    while (1) {
+        int var_found = 1;
+        
+        if (var_ptr == NULL)
+            return NULL;
+
+        int i = 0, j = 0;
+
+        while(*name_end == ' ' || *name_end == '\t')
+            ++name_end;
+        
+        while (1) {
+            if (name[i] == ' ' || name[i] == '\t') {
+                ++i;
+                continue;
+            }
+            if (name[i] == '\0' || (name_end != NULL && name + i >= name_end)) {
+                break;
+            }
+            if (var_ptr->variable_name[j] == '\0') {
+                break;
+            }
+            if (name[i] != var_ptr->variable_name[j]) {
+                var_found = 0;
+                break;
+            }
+            i++;
+            j++;
+        }
+
+        if ((name[i] == '\0' || name + i == name_end) && var_ptr->variable_name[j] == '\0') {
+            var_found = 1;
+        } else {
+            var_found = 0;
+        }
+
+        if (var_found) {
+            return var_ptr;
+        }
+
+        var_ptr = var_ptr->next_var;
+    }
+}
+
+
+
+
+parser_var &parser::calculate(const char expression[]) {
+    int length;
+    int i, j;
+    int number_is_next = 1;
+    int number_prefix = 1;
+    const char *number_string_start = expression;
+    operator_stack = NULL;
+    output_queue = NULL;
+
+    for (length = 0; expression[length] != '\0'; length++);
+
+    for (i = 0; i < length; i++) {
+        if (expression[i] == ' ' || expression[i] == '\t')
+            continue;
+
+        if (number_is_next) {
+            if (expression[i] == '*' || expression[i] == '/' || expression[i] == '^' || expression[i] == ')')
+                throw error_calculation("Failed to parse expression");
+            // Ako je znak funkcija
+            else if (expression[i] == 'T' && !isdigit(expression[i + 1]) && !isupper(expression[i + 1]) && !islower(expression[i + 1])) {
+                switch (expression[i]) {
+                    case 'T':
+                        add_function_to_queue(PARSER_FUNCTION_TRANS);
+                        break;
+                }
+                continue;
+            }
+            // Ako je znak predznak +
+            else if (expression[i] == '-') {
+                number_prefix *= -1;
+                continue;
+            }
+            // Ako je znak predznak -
+            else if (expression[i] == '+') {
+                // Do nothing
+                continue;
+            }
+            // Ako je znak otvorena zagrada
+            else if (expression[i] == '(') {
+                // Ako je predznak zagrade negativan
+                if (number_prefix < 0) {
+                    // Dodaj -1 u output queue
+                    parser_var *var_ptr = new parser_var;
+                    var_ptr->num(number_prefix);
+                    add_variable_to_queue(var_ptr);
+                    // Dodaj * na operator stack
+                    add_to_stack(PARSER_OPERATOR_MUL);
+                    // Vrati prefix na 1
+                    number_prefix = 1;
+                }
+                add_to_stack(PARSER_OPERATOR_OPN);
+                number_string_start = expression + i + 1;
+                continue;
+            }
+            // Ako je znak znamenka
+            else if (isdigit(expression[i])) {
+                parser_var * var_ptr;
+                double parsed_number;
+                number_is_next = 0;
+                // Pomakni se na sljedeći operator
+                while (isdigit(expression[i]) || expression[i] == '.')
+                    ++i;
+                // Probaj parsat broj do operatora
+                try {
+                    parsed_number = number_parse(number_string_start, expression + i);
+                } catch (calculator_error err) {
+                    throw error_calculation(err.info());
+                }
+                // Spremi ga u queue
+                var_ptr = new parser_var;
+                var_ptr->num(parsed_number);
+                add_variable_to_queue(var_ptr);
+                --i;
+                number_is_next = 0;
+                continue;
+            }
+            // Ako je znak slovo
+            else if (islower(expression[i]) || isupper(expression[i])) {
+                // Ako je predznak varijable negativan
+                if (number_prefix < 0) {
+                    // Dodaj -1 u output queue
+                    parser_var *var_ptr = new parser_var;
+                    var_ptr->num(number_prefix);
+                    add_variable_to_queue(var_ptr);
+                    // Dodaj * na operator stack
+                    add_to_stack(PARSER_OPERATOR_MUL);
+                    // Vrati prefix na 1
+                    number_prefix = 1;
+                }
+                number_string_start = expression + i;
+                parser_var *var_ptr;
+                // Pronađi kraj riječi
+                while (islower(expression[i]) || isupper(expression[i]) || isdigit(expression[i]))
+                    ++i;
+                // Pogledaj postoji li varijabla tog naziva
+                var_ptr = find_variable(number_string_start, expression + i);
+                // Ako ne postoji baci grešku
+                if (var_ptr == NULL) {
+                    throw error_calculation("Variable not found");
+                }
+                parser_var *new_var = new parser_var;
+                *new_var = *var_ptr;
+                // u suprotnom dodaj ju u queue
+                add_variable_to_queue(new_var);
+                --i;
+                number_is_next = 0;
+                continue;
+            }
+        }
+        else {
+            if (expression[i] == ')') {
+                while (1) {
+                    if (operator_stack == NULL)
+                        throw error_calculation("Failed to parse expression");
+                    
+                    parser_var *var_ptr = pop_from_stack();
+                    if (var_ptr->opr_code == PARSER_OPERATOR_OPN)
+                        break;
+                    add_variable_to_queue(var_ptr);
+                }
+            }
+            else if (expression[i] == '^') {
+                add_to_stack(PARSER_OPERATOR_EXP);
+                number_is_next = 1;
+            }
+            else if (expression[i] == '*') {
+                while (operator_stack != NULL && operator_stack->opr_code == PARSER_OPERATOR_EXP) {
+                    add_variable_to_queue(pop_from_stack());
+                }
+                add_to_stack(PARSER_OPERATOR_MUL);
+                number_is_next = 1;
+            }
+            else if (expression[i] == '/') {
+                while (operator_stack != NULL && operator_stack->opr_code == PARSER_OPERATOR_EXP) {
+                    add_variable_to_queue(pop_from_stack());
+                }
+                add_to_stack(PARSER_OPERATOR_DIV);
+                number_is_next = 1;
+            }
+            else if (expression[i] == '+') {
+                while (
+                    operator_stack != NULL && (
+                    operator_stack->opr_code == PARSER_OPERATOR_EXP ||
+                    operator_stack->opr_code == PARSER_OPERATOR_MUL ||
+                    operator_stack->opr_code == PARSER_OPERATOR_DIV )
+                ) {
+                    add_variable_to_queue(pop_from_stack());
+                }
+                add_to_stack(PARSER_OPERATOR_ADD);
+                number_is_next = 1;
+            }
+            else if (expression[i] == '-') {
+                while (
+                    operator_stack != NULL && (
+                    operator_stack->opr_code == PARSER_OPERATOR_EXP ||
+                    operator_stack->opr_code == PARSER_OPERATOR_MUL ||
+                    operator_stack->opr_code == PARSER_OPERATOR_DIV )
+                ) {
+                    add_variable_to_queue(pop_from_stack());
+                }
+                add_to_stack(PARSER_OPERATOR_SUB);
+                number_is_next = 1;
+            }
+            else {
+                throw error_calculation("Failed to parse expression");
+            }
+            number_string_start = expression + i + 1;
+        }
+    }
+
+    while (operator_stack != NULL) {
+        add_variable_to_queue(pop_from_stack());
+    }
+
+    // probni ispis
+    while (output_queue != NULL) {
+        parser_var *var_ptr = pop_from_queue();
+
+        switch (var_ptr->type()) {
+            case PARSER_VAR_OPERATOR:
+                std::cout << "OPR: " << var_ptr->opr_code << "\n";
+                break;
+            case PARSER_VAR_FUNCTION:
+                std::cout << "FUN: " << var_ptr->fun_code << "\n";
+                break;
+            case PARSER_VAR_NUMBER:
+                std::cout << var_ptr->num() << "\n";
+                break;
+            case PARSER_VAR_MATRIX:
+                std::cout << var_ptr->mat() << "\n";
+                break;
+        }
+    }
 }

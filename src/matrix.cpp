@@ -5,19 +5,7 @@ using namespace std;
 /*
  * Constructors
  */
-matrix::data matrix::analize_matrix(){
-    data matrix_data;
-    matrix_data.square=is_squared();
-    matrix_data.nul=is_nul();
-    matrix_data.identity=is_identity();
-    matrix_data.upper_triangular=is_upper_triangular();
-    matrix_data.lower_triangular=is_lower_triangular();
-    matrix_data.diagonal=is_diagonal();
-    matrix_data.simetrical=is_simetrical();
-    matrix_data.antisimetrical=is_antisimetrical();
-    matrix_data.ortogonal=is_ortogonal();
-    return matrix_data;
-}
+
 matrix::matrix(int number_rows, int number_cols) {
     int i;
 
@@ -27,84 +15,6 @@ matrix::matrix(int number_rows, int number_cols) {
     mat_ptr = new double*[rows];
     for (i = 0; i < rows; i++)
         mat_ptr[i] = new double[cols];
-}
- int matrix::is_squared(){
-    return rows==cols;
-}
-int matrix::is_ortogonal(){
-    return ((*this)*trans()).is_identity() && (trans()*(*this)).is_identity(); 
-}
- int matrix::is_simetrical(){
-    int rez=1;
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            if(mat_ptr[i][j]!=mat_ptr[j][i]){
-                rez=0;
-            }
-        }
-    }
-    return rez;
-}
-int matrix::is_antisimetrical(){
-    int rez=1;
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            if(mat_ptr[i][j]!=-mat_ptr[j][i]){
-                rez=0;
-            }
-        }
-    }
-    return rez;
-}
-int matrix::is_diagonal(){
-    return is_upper_triangular() && is_lower_triangular();
-}
-int matrix::is_lower_triangular(){
-    int rez=1;
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            if(mat_ptr[i][j]!=0 && i<j){
-                rez=0;
-            }
-        }
-    }
-    return rez && is_squared();
-}
-int matrix::is_upper_triangular(){
-    int rez=1;
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            if(mat_ptr[i][j]!=0 && i>j){
-                rez=0;
-            }
-        }
-    }
-    return rez && is_squared();
-}
- int matrix::is_identity(){
-    int rez=1;
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            if(mat_ptr[i][j]!=1 && i==j){
-                rez=0;
-            }
-            if(mat_ptr[i][j]!=0 && i!=j){
-                rez=0;
-            }
-        }
-    }
-    return rez && is_squared();
-}
- int matrix::is_nul(){
-    int rez=1;
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            if(mat_ptr[i][j]!=0){
-                rez=0;
-            }
-        }
-    }
-    return rez;
 }
 
 matrix::matrix(const matrix &other_mat) {
@@ -159,6 +69,106 @@ inline double matrix::get(int row, int col) const {
         throw matrix::element_not_found("Given element doesn't exist");
     }
 }
+
+/*
+ * Funkcije za analiziranje matrica
+ */
+
+matrix::data matrix::analize_matrix() {
+    data matrix_data;
+    matrix_data.square = is_squared();
+    matrix_data.nul = is_nul();
+    matrix_data.identity = is_identity();
+    matrix_data.upper_triangular = is_upper_triangular();
+    matrix_data.lower_triangular = is_lower_triangular();
+    matrix_data.diagonal = is_diagonal();
+    matrix_data.simetrical = is_simetrical();
+    matrix_data.antisimetrical = is_antisimetrical();
+    matrix_data.ortogonal = is_ortogonal();
+    return matrix_data;
+}
+int matrix::is_squared() {
+    return rows == cols;
+}
+int matrix::is_ortogonal() {
+    return ((*this)*trans()).is_identity() && (trans()*(*this)).is_identity(); 
+}
+int matrix::is_simetrical() {
+    int rez = 1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(mat_ptr[i][j] != mat_ptr[j][i]) {
+                rez = 0;
+            }
+        }
+    }
+    return rez;
+}
+int matrix::is_antisimetrical() {
+    int rez = 1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(mat_ptr[i][j] != -mat_ptr[j][i]) {
+                rez = 0;
+            }
+        }
+    }
+    return rez;
+}
+int matrix::is_diagonal() {
+    return is_upper_triangular() && is_lower_triangular();
+}
+int matrix::is_lower_triangular() {
+    int rez = 1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(mat_ptr[i][j] != 0 && i < j) {
+                rez = 0;
+            }
+        }
+    }
+    return rez && is_squared();
+}
+int matrix::is_upper_triangular() {
+    int rez = 1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(mat_ptr[i][j] != 0 && i > j) {
+                rez = 0;
+            }
+        }
+    }
+    return rez && is_squared();
+}
+int matrix::is_identity() {
+    int rez = 1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(mat_ptr[i][j] != 1 && i == j) {
+                rez = 0;
+            }
+            if(mat_ptr[i][j] != 0 && i != j) {
+                rez = 0;
+            }
+        }
+    }
+    return rez && is_squared();
+}
+int matrix::is_nul() {
+    int rez = 1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(mat_ptr[i][j] != 0) {
+                rez = 0;
+            }
+        }
+    }
+    return rez;
+}
+
+/*
+ * Funkcije za vršenje operacija nad matricom (rezultat je nova matrica)
+ */
 
 matrix matrix::trans() const {
     int i, j;

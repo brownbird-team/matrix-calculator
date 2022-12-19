@@ -3,86 +3,47 @@
 
 #include <matrix.hpp>
 #include <parser.hpp>
+#include <calculator_error.hpp>
 
 using namespace std;
 
 int main() {
+    // Testiranje parsera (varijable)
 
-    // Testiranje parser_var klase (bez operator overloadinga, jos nije gotov)
-/*
-    parser_var pvar;
+    parser parse;
 
-    try {
-        pvar.mat("neki random text{{000,      1, 2},{43, 5, 2},{120, 1, 2},{23, 4, 2}}");
-    } catch (parser_var::error_parse err) {
-        cout << "Parser ERROR: " << err.info() << "\n";
-        return 0;
-    }
+    parse.variable("Krizan").mat("{{1, 2},{3, 4}}");
 
+    cout << "Matrica Krizan:\n" << parse.variable("Krizan").mat();
 
-*/
-  /*  matrix matA(3, 3);
-    matA.set(1, 1, 0);
-    matA.set(1, 2, -3);
-    matA.set(1, 3, 4);
-    matA.set(2, 1, 3);
-    matA.set(2, 2, 0);
-    matA.set(2, 3, 0);
-    matA.set(3, 1, -4);
-    matA.set(3, 2, 0);
-    matA.set(3, 3, 0);
-    */
-    matrix matA(2,2);
-    matA.set(1, 1, 0);
-    matA.set(1, 2, 1);
-    matA.set(2, 1, -1);
-    matA.set(2, 2, 0);
-    /*
-    cout << "--- Hello it seems to be working ----\n\n";
-    cout << "Matrica: \n" << pvar.mat();
+    parse.variable("Krizan").num(5);
+
+    cout << "\nBroj Krizan: " << parse.variable("Krizan").num() << "\n\n";
+
+    cout << "\nBroj Krizan (preko indexa): " << parse[0].num() << "\n\n";
+
+    parse.variable("Nadarevic").mat("{{--++1, ---1}{-1, -1}}");
+
+    parse.variable("Test") = parse.variable("Nadarevic") * parse.variable("Krizan");
+
+    cout << "\n\nUmnozak:\n" << parse.variable("Test").mat();
+
+    cout << "Broj varijabli: " << parse.length() << "\n";
+
+    parse.del_variable("Nadarevic");
+
+    cout << "Broj varijabli: " << parse.length() << "\n";
+
+    cout << "\n----------------------------------------------------\n";
+    parse.variable("TEST").num(222);
+
+    cout << "Proba parsera: \n";
 
     try {
-        pvar.num(1234.1231);
-    } catch (parser_var::error_parse err) {
-        cout << "Parser ERROR: " << err.info() << "\n";
-        return 0;
+    parse.calculate("3 + 2 * -(11 * (33 + 22)) * -TEST");
+    } catch (calculator_error err) {
+        cout << "PARSER ERROR: " << err.info() << "\n";
     }
 
-    cout << "Broj : " << pvar.num() << "\n";
-
-    
-    pvar.mat(matA);
-    
-    pvar.mat(matA);
-    cout << "Matrica dodjeljena varijablom: \n" << pvar.mat();
-*/
-    cout << "Matrica dodjeljena varijablom: \n" << matA.trans();
-    cout << matA.is_squared() << "\n";
-    cout << matA.is_identity() << "\n";
-    cout << matA.is_upper_triangular() << "\n";
-    cout << matA.is_lower_triangular() << "\n";
-    cout << matA.is_diagonal() << "\n";
-    cout << matA.is_simetrical() << "\n";
-    cout << matA.is_antisimetrical() << "\n";
-    cout << matA.is_ortogonal() << "\n";
-    cout << "Kvadratna " << matA.analize_matrix().square << "\n";
-    cout << "---------------------" << "\n";
-  /*  
-    cout << "Matrica dodjeljena varijablom: \n" << matA.trans();
-
-    cout << "------------- Testiranje parser vara -------------\n";
-    parser_var parvar;
-    parser_var res;
-
-    parvar.mat("{{1, 2, 3},{4, 1234567890'5, 6},{7, 8, 9}}");
-
-    cout << "Matrica na pocetku:\n" << parvar.mat();
-
-    parvar = parvar + parvar;
-
-    cout << "Matrica + Matrica:\n" << parvar.mat();
-
-    parvar = parvar * 2;
-
-    cout << "Matrica * 2:\n" << parvar.mat();*/
+    return 0;
 }

@@ -2,41 +2,8 @@
 #define INCLUDE_PARSER_HPP
 
 #include <matrix.hpp>
+#include <calculator_error.hpp>
 #include <iostream>
-
-class parser_operator {
-    public:
-        int id;
-        char character;
-
-        parser_operator(const int oper_id, const char oper_char) {
-            int i;
-            id = oper_id;
-            character = oper_char;
-        }
-        parser_operator(const parser_operator &other_oper) {
-            int i;
-            id = other_oper.id;
-            character = other_oper.character;
-        }
-};
-
-// Kodovi operatora parser varijable
-#define PARSER_OPERATOR_ADD   0         // Zbrajanje operanata
-#define PARSER_OPERATOR_SUB   1         // Oduzimanje operanata
-#define PARSER_OPERATOR_MUL   2         // Množenje operanata
-#define PARSER_OPERATOR_DIV   3         // Dijeljenje operanata
-#define PARSER_OPERATOR_EXP   4         // Drugi operant je eksponent prvog
-
-// Definiraj znak svakog od operatora
-const parser_operator parser_operators[] {
-    parser_operator(PARSER_OPERATOR_ADD, '+'),
-    parser_operator(PARSER_OPERATOR_SUB, '-'),
-    parser_operator(PARSER_OPERATOR_MUL, '*'),
-    parser_operator(PARSER_OPERATOR_DIV, '/'),
-    parser_operator(PARSER_OPERATOR_EXP, '^')
-};
-
 
 /*******************************************************************************
  * Parser variable (parser_var) class                                          *
@@ -116,9 +83,6 @@ const parser_operator parser_operators[] {
  *                                                                             *
  *******************************************************************************/
 
-// Maksimalna duljina opisa greške parser varijable
-#define MAX_PARSER_VAR_ERR_DESC 70
-
 // Tipovi parser varijable
 #define PARSER_VAR_UNDEFINED  0
 #define PARSER_VAR_NUMBER     1
@@ -129,13 +93,18 @@ const parser_operator parser_operators[] {
 class parser_var {
     private:
         int var_type;         // Tip podatka pohranjenog u varijabli undefined/matrica/broj
-        int opr_code;         // Kod operatora ako je pohranjen
-        int fun_code;         // Kod funkcije ako je pohranjena
         double *number_part;  // Pointer na broj ako je pohranjen
         matrix *matrix_part;  // Pointer na matricu ako je pohranjena
     protected:
         parser_var *next_var; // Pointer na sljedeću varijablu u listi
                               // koristi ju parser klasa kod povezivanja varijabli u listu (linked list)
+
+        int opr_code;         // Kod operatora ako je pohranjen, samo parser klasa (interno) koristi ovaj tip varijable
+        int fun_code;         // Kod funkcije ako je pohranjena, samo parser klasa (interno) koristi ovaj tip varijable
+
+        char *variable_name;  // Pointer na ime varijable, koristi se u parser klasi
+                              // ako je postavljen na neku vrijednost, pri uništavanju objekta lokacija na koju pointer
+                              // pokazuje bit će oslobođena delete operatorom
     public:
         // Constructor
         parser_var() {
@@ -143,6 +112,7 @@ class parser_var {
             var_type = PARSER_VAR_UNDEFINED;
             number_part = NULL;
             matrix_part = NULL;
+            variable_name = NULL;
         }
         // Copy constructor
         parser_var(const parser_var &other_parser_var) {
@@ -163,6 +133,8 @@ class parser_var {
                 delete number_part;
             if (matrix_part != NULL)
                 delete matrix_part;
+            if (variable_name != NULL)
+                delete variable_name;
         }
         // Dobavi tip varijable undefined/matrica/broj/operator
         inline int type() const {
@@ -172,23 +144,6 @@ class parser_var {
         inline int is_defined() const {
             return (var_type != PARSER_VAR_UNDEFINED) ? 1 : 0;
         }
-        // Postavi tip varijable na operator i kopiraj dani operator u varijablu
-        inline int opr(const int operator_code) {
-            switch(var_type) {
-                case PARSER_VAR_NUMBER:
-                    delete number_part;
-                    number_part = NULL;
-                    break;
-                case PARSER_VAR_MATRIX:
-                    delete matrix_part;
-                    matrix_part = NULL;
-                    break;
-            }
-            var_type = PARSER_VAR_OPERATOR;
-            opr_code = operator_code;
-        }
-        // Postavi tip varijable na operator i u nju spremi operator danog stringa
-        inline int opr();
         // Postavi tip varijable na matricu i kopiraj dani objekt matrice u nju
         inline matrix &mat(const matrix &matrix_object) {
             switch(var_type) {
@@ -246,42 +201,26 @@ class parser_var {
                 throw error_undefined("Number is undefined");
         }
 
-        // Općenito greška vezana uz parser_var
-        class error {
-            private:
-                char description[MAX_PARSER_VAR_ERR_DESC];
-            public:
-                error(const char desc[]) {
-                    int i;
-                    for (i = 0; desc[i] != '\0' && i < MAX_PARSER_VAR_ERR_DESC - 1; i++)
-                        description[i] = desc[i];
-                    description[i] = '\0';
-                }
-                inline const char * info() const {
-                    return description;
-                }
-        };
-
         // Greška se javlja pri dobavljanju vrijednosti koja nije definirana
-        class error_undefined : public error {
+        class error_undefined : public calculator_error {
             public:
-                error_undefined(const char desc[]) : error(desc) {}
+                error_undefined(const char desc[]) : calculator_error(desc) {}
         };
         // Greška se javlja pri računanju vrijednosti koje je nemoguće izračunati
-        class error_calculation : public error {
+        class error_calculation : public calculator_error {
             public:
-                error_calculation(const char desc[]) : error(desc) {}
+                error_calculation(const char desc[]) : calculator_error(desc) {}
         };
         // Greška se javlja pri neuspjelom pokušaju izvlačenja podataka iz niza znakova
-        class error_parse : public error {
+        class error_parse : public calculator_error {
             public:
-                error_parse(const char desc[]) : error(desc) {}
+                error_parse(const char desc[]) : calculator_error(desc) {}
         };
         // Greška se javlja pri pokušaju pretvorbe u tip u koji nije moguće pretvoriti
         // sadržaj varijable npr. matrica >> double
-        class error_cast : public error {
+        class error_cast : public calculator_error {
             public:
-                error_cast(const char desc[]) : error(desc) {}
+                error_cast(const char desc[]) : calculator_error(desc) {}
         };
 
         // Definicija operatora dodjeljivanja
@@ -321,21 +260,72 @@ extern parser_var operator / (const parser_var &a, const double n);
 extern parser_var operator / (const double n, const parser_var &a);
 
 
-/*
+// Kodovi operatora parsera
+#define PARSER_OPERATOR_ADD   0         // Zbrajanje operanata
+#define PARSER_OPERATOR_SUB   1         // Oduzimanje operanata
+#define PARSER_OPERATOR_MUL   2         // Množenje operanata
+#define PARSER_OPERATOR_DIV   3         // Dijeljenje operanata
+#define PARSER_OPERATOR_EXP   5         // Drugi operant je eksponent prvog
+#define PARSER_OPERATOR_OPN   6         // Otvorena zagrada
+#define PARSER_OPERATOR_CLS   7         // Zatvorena zagrada
+
+// Kodovi funkcija parsera
+#define PARSER_FUNCTION_TRANS 0
+
 class parser {
     private:
-        parser_var result;
+        parser_var *variables;       // Pointer na prvu varijablu u listi definiranih varijabli
+        parser_var res_var;          // Varijabla u koju se sprema rezultat operacije
+
+        parser_var *operator_stack;
+        parser_var *output_queue;
+
+        parser_var *add_to_stack(const int operator_code);
+        parser_var *pop_from_stack();
+
+        parser_var *add_operator_to_queue(const int operator_code);
+        parser_var *add_function_to_queue(const int function_code);
+        parser_var *add_variable_to_queue(parser_var *new_var_ptr);
+        parser_var *pop_from_queue();
+        
+        parser_var *find_variable(const char *name, const char *name_end);
+
     public:
+        // Default constructor
+        parser() {
+            variables = NULL;
+        }
         // Ako ne postoji kreiraj varijablu, zatim vrati referencu na istu
-        parser_var &var(const char name[]);
+        parser_var &variable(const char name[]);
         // Obriši varijablu danog imena
-        void delvar(const char name[]);
+        void del_variable(const char name[]);
+        // Broj kreiranih varijabli parsera
+        int length();
         // Izračunaj izraz
-        void calculate(const char expression[]);
-        // Provjeri postoji li nešto u varijabli rezultata računa
-        int result_is_defined();
+        parser_var &calculate(const char expression[]);
         // Dobavi rezultat računa
-        parser_var &result();
-};*/
+        parser_var &result() {
+            return res_var;
+        }
+        // Koristi se za pristupanje pojedinoj varijabli prema indexu
+        // NAPOMENA: index varijable se mijenja ako je obrisana varijabla prije nje
+        parser_var &operator [] (int index);
+
+        // Greška se javlja pri dobavljanju varijable koja nije definirana
+        class error_undefined : public calculator_error {
+            public:
+                error_undefined(const char desc[]) : calculator_error(desc) {}
+        };
+        // Greška se javlja pri računanju vrijednosti koje je nemoguće izračunati
+        class error_calculation : public calculator_error {
+            public:
+                error_calculation(const char desc[]) : calculator_error(desc) {}
+        };
+        // Greška se javlja pri neuspjelom pokušaju 
+        class error_invalid : public calculator_error {
+            public:
+                error_invalid(const char desc[]) : calculator_error(desc) {}
+        };
+};
 
 #endif

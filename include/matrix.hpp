@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <calculator_error.hpp>
 
 #ifndef INCLUDE_MATRIX_HPP
 #define INCLUDE_MATRIX_HPP
@@ -82,32 +83,16 @@ class matrix {
             return *this;
         }
 
-        // Općenito greška vezana uz matrix
-        class error {
-            private:
-                char description[MAX_MATRIX_ERR_DESC];
-            public:
-                error(const char desc[]) {
-                    int i;
-                    for (i = 0; desc[i] != '\0' && i < MAX_MATRIX_ERR_DESC - 1; i++)
-                        description[i] = desc[i];
-                    description[i] = '\0';
-                }
-                inline const char * info() const {
-                    return description;
-                }
-        };
-
         // Došlo je do greške pri računanju sa danim matricama
-        class calculation_error : public error {
+        class calculation_error : public calculator_error {
             public:
-                calculation_error(const char desc[]) : error(desc) {}
+                calculation_error(const char desc[]) : calculator_error(desc) {}
         };
 
         // Traženi element ne postoji u matrici
-        class element_not_found : public error {
+        class element_not_found : public calculator_error {
             public:
-                element_not_found(const char desc[]) : error(desc) {}
+                element_not_found(const char desc[]) : calculator_error(desc) {}
         };
 };
 
