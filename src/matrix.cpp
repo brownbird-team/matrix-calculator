@@ -188,7 +188,7 @@ matrix matrix::trans() const {
 matrix operator + (const matrix &a, const matrix &b) {
     if (a.cols == b.cols && a.rows == b.rows) {
         int i, j;
-        matrix result(a.cols, a.rows);
+        matrix result(a.rows, a.cols);
 
         for (i = 1; i <= a.rows; i++) {
             for (j = 1; j <= a.cols; j++) {
@@ -204,7 +204,7 @@ matrix operator + (const matrix &a, const matrix &b) {
 matrix operator - (const matrix &a, const matrix &b) {
     if (a.cols == b.cols && a.rows == b.rows) {
         int i, j;
-        matrix result(a.cols, a.rows);
+        matrix result(a.rows, a.cols);
 
         for (i = 1; i <= a.rows; i++) {
             for (j = 1; j <= a.cols; j++) {
