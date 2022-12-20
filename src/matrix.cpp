@@ -175,7 +175,7 @@ matrix matrix::trans() const {
     matrix transp(cols, rows);
     for(i = 1; i <= rows; i++) {
         for(j = 1; j <= cols; j++) {
-            transp.set(i, j, get(j, i));
+            transp.set(j, i, get(i, j));
         }
     }
     return transp;
