@@ -279,6 +279,7 @@ class parser {
 
         parser_var *operator_stack;
         parser_var *output_queue;
+        parser_var *temp_stack;
 
         parser_var *add_to_stack(const int operator_code);
         parser_var *pop_from_stack();
@@ -287,8 +288,13 @@ class parser {
         parser_var *add_function_to_queue(const int function_code);
         parser_var *add_variable_to_queue(parser_var *new_var_ptr);
         parser_var *pop_from_queue();
+
+        parser_var *add_to_temp_stack(parser_var *new_var_ptr);
+        parser_var *pop_from_temp_stack();
         
         parser_var *find_variable(const char *name, const char *name_end);
+
+        void clear_all_stacks();
 
     public:
         // Default constructor

@@ -39,8 +39,16 @@ int main() {
 
     cout << "Proba parsera: \n";
 
+    parse.variable("V1").mat("{{1, 2},{3, 4},{5, 6}}");
+    parse.variable("V2").mat("{{1, 2},{3, 4}}");
+
+    std::cout << (parse.variable("V1") * parse.variable("V2")).mat();
+
     try {
-    parse.calculate("3 + 2 * -(11 * (33 + 22)) * -TEST");
+        //parse.calculate("3 + 2 * -(11 * (33 + 2233)) * -TEST");
+        parse.calculate("V1^T");
+        //parse.calculate("2 + 2 * 3");
+        cout << "REZULTAT: " << parse.result().mat() << "\n";
     } catch (calculator_error err) {
         cout << "PARSER ERROR: " << err.info() << "\n";
     }

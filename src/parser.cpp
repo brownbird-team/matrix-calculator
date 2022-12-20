@@ -338,7 +338,7 @@ parser_var operator * (const parser_var &a, const parser_var &b) {
     // Ako je a matrica i b matrica
     if (a.type() == PARSER_VAR_MATRIX && b.type() == PARSER_VAR_MATRIX) {
         try {
-            result.mat(a.mat());
+            result.mat(a.mat() * b.mat());
         } catch (matrix::calculation_error err) {
             throw parser_var::error_calculation(err.info());
         }
@@ -646,9 +646,36 @@ parser_var *parser::add_variable_to_queue(parser_var *new_var_ptr) {
     }
     return output_queue;
 }
+parser_var *parser::add_to_temp_stack(parser_var *new_var_ptr) {
+    parser_var *temp_ptr = temp_stack;
+    temp_stack = new_var_ptr;
+    temp_stack->next_var = temp_ptr;
+    return temp_stack;
+}
+parser_var *parser::pop_from_temp_stack() {
+    if (temp_stack == NULL) {
+        return NULL;
+    } else {
+        parser_var *pop_result = temp_stack;
+        temp_stack = temp_stack->next_var;
+        return pop_result;
+    }
+}
 
-
-
+void parser::clear_all_stacks() {
+    while (operator_stack != NULL) {
+        parser_var *var_ptr = pop_from_stack();
+        delete var_ptr;
+    }
+    while (output_queue != NULL) {
+        parser_var *var_ptr = pop_from_queue();
+        delete var_ptr;
+    }
+    while (temp_stack != NULL) {
+        parser_var *var_ptr = pop_from_temp_stack();
+        delete var_ptr;
+    }
+}
 
 
 parser_var *parser::find_variable(const char *name, const char *name_end) {
@@ -708,6 +735,7 @@ parser_var &parser::calculate(const char expression[]) {
     int number_prefix = 1;
     const char *number_string_start = expression;
     operator_stack = NULL;
+    temp_stack = NULL;
     output_queue = NULL;
 
     for (length = 0; expression[length] != '\0'; length++);
@@ -845,7 +873,8 @@ parser_var &parser::calculate(const char expression[]) {
                     operator_stack != NULL && (
                     operator_stack->opr_code == PARSER_OPERATOR_EXP ||
                     operator_stack->opr_code == PARSER_OPERATOR_MUL ||
-                    operator_stack->opr_code == PARSER_OPERATOR_DIV )
+                    operator_stack->opr_code == PARSER_OPERATOR_DIV ||
+                    operator_stack->opr_code == PARSER_OPERATOR_SUB )    // << ovo smo dodali
                 ) {
                     add_variable_to_queue(pop_from_stack());
                 }
@@ -857,7 +886,8 @@ parser_var &parser::calculate(const char expression[]) {
                     operator_stack != NULL && (
                     operator_stack->opr_code == PARSER_OPERATOR_EXP ||
                     operator_stack->opr_code == PARSER_OPERATOR_MUL ||
-                    operator_stack->opr_code == PARSER_OPERATOR_DIV )
+                    operator_stack->opr_code == PARSER_OPERATOR_DIV ||
+                    operator_stack->opr_code == PARSER_OPERATOR_SUB )    // << ovo smo dodali
                 ) {
                     add_variable_to_queue(pop_from_stack());
                 }
@@ -868,6 +898,7 @@ parser_var &parser::calculate(const char expression[]) {
                 throw error_calculation("Failed to parse expression");
             }
             number_string_start = expression + i + 1;
+            number_prefix = 1;
         }
     }
 
@@ -876,7 +907,7 @@ parser_var &parser::calculate(const char expression[]) {
     }
 
     // probni ispis
-    while (output_queue != NULL) {
+    /*while (output_queue != NULL) {
         parser_var *var_ptr = pop_from_queue();
 
         switch (var_ptr->type()) {
@@ -893,5 +924,147 @@ parser_var &parser::calculate(const char expression[]) {
                 std::cout << var_ptr->mat() << "\n";
                 break;
         }
+    }*/
+
+    // Izračunaj expression pohranjen u queue-u
+    while (output_queue != NULL) {
+        parser_var *var_ptr;              // Sljedeći token iz queue
+        var_ptr = pop_from_queue();
+
+        switch (var_ptr->type()) {
+            // Ako je token broj
+            case PARSER_VAR_NUMBER:
+                add_to_temp_stack(var_ptr);
+                break;
+            // Ako je token funkcija
+            case PARSER_VAR_FUNCTION:
+                add_to_temp_stack(var_ptr);
+                break;
+            // Ako je token matrica
+            case PARSER_VAR_MATRIX:
+                add_to_temp_stack(var_ptr);
+                break;
+            // Ako je token operator
+            case PARSER_VAR_OPERATOR:
+                parser_var *var_1, *var_2;
+                // Ako stack operanada nije NULL uzmi operand 1 sa njega
+                if (temp_stack == NULL) {
+                    throw error_calculation("Something is wrong with operands 1");
+                } else {
+                    var_1 = pop_from_temp_stack();
+                }
+                // Ako stack operanada nije NULL uzmi operand 2 sa njega
+                if (temp_stack == NULL) {
+                    throw error_calculation("Something is wrong with operands 2");
+                } else {
+                    var_2 = pop_from_temp_stack();
+                }
+                // Pointer na varijablu u koju je pohranjen rezultat operacije
+                parser_var *res_ptr = new parser_var;
+                // Ako je ovo
+                switch (var_ptr->opr_code) {
+                    // Operator zbrajanja
+                    case PARSER_OPERATOR_ADD:
+                        // Probaj izračunat
+                        try {
+                            *res_ptr = (*var_2) + (*var_1);
+                        } catch (calculator_error err) {
+                            // Ako račun nije uspio, pobriši nove varijable i vrati grešku
+                            delete var_1;
+                            delete var_2;
+                            delete res_ptr;
+                            throw error_calculation(err.info());
+                        }
+                        // Uspjelo je pa spremi rezultat
+                        delete var_1;
+                        delete var_2;
+                        add_to_temp_stack(res_ptr);
+                        break;
+                    // Operator oduzimanja
+                    case PARSER_OPERATOR_SUB:
+                        // Probaj izračunat
+                        try {
+                            *res_ptr = (*var_2) - (*var_1);
+                        } catch (calculator_error err) {
+                            // Ako račun nije uspio, pobriši nove varijable i vrati grešku
+                            delete var_1;
+                            delete var_2;
+                            delete res_ptr;
+                            throw error_calculation(err.info());
+                        }
+                        // Uspjelo je pa spremi rezultat
+                        delete var_1;
+                        delete var_2;
+                        add_to_temp_stack(res_ptr);
+                        break;
+                    // Operator množenja
+                    case PARSER_OPERATOR_MUL:
+                        // Probaj izračunat
+                        try {
+                            *res_ptr = (*var_2) * (*var_1);
+                        } catch (calculator_error err) {
+                            // Ako račun nije uspio, pobriši nove varijable i vrati grešku
+                            delete var_1;
+                            delete var_2;
+                            delete res_ptr;
+                            throw error_calculation(err.info());
+                        }
+                        // Uspjelo je pa spremi rezultat
+                        delete var_1;
+                        delete var_2;
+                        add_to_temp_stack(res_ptr);
+                        break;
+                    // Operator dijeljenja
+                    case PARSER_OPERATOR_DIV:
+                        // Probaj izračunat
+                        try {
+                            *res_ptr = (*var_2) / (*var_1);
+                        } catch (calculator_error err) {
+                            // Ako račun nije uspio, pobriši nove varijable i vrati grešku
+                            delete var_1;
+                            delete var_2;
+                            delete res_ptr;
+                            throw error_calculation(err.info());
+                        }
+                        // Uspjelo je pa spremi rezultat
+                        delete var_1;
+                        delete var_2;
+                        add_to_temp_stack(res_ptr);
+                        break;
+                    // Operator eksponenta
+                    case PARSER_OPERATOR_EXP:
+                        // Ako je u eksponenti funkcija
+                        if (var_1->type() == PARSER_VAR_FUNCTION) {
+                            switch (var_1->fun_code) {
+                                // Ako je to funkcija za transponiranje matrice
+                                case PARSER_FUNCTION_TRANS:
+                                    // Provjeri je li drugi operand matrica
+                                    if (var_2->type() == PARSER_VAR_MATRIX) {
+                                        parser_var var_2_trans;
+                                        var_2_trans.mat(
+                                            var_2->mat().trans()
+                                        );
+                                        *res_ptr = var_2_trans;
+                                        add_to_temp_stack(res_ptr);
+                                    } else {
+                                        throw error_calculation("Function TRANS can only be used on matrices");
+                                    }
+                                    break;
+                                default:
+                                    throw error_calculation("Internal error, function not found");
+                                    break;
+                            }
+                        } else {
+                            // Onda je broj i treba izračunat potenciju -- NIJE GOTOVO
+                        }
+                        break;
+                }
+                break;
+        }
     }
+
+    res_var = *pop_from_temp_stack();
+    clear_all_stacks();
+
+    return res_var;
 }
