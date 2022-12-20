@@ -190,11 +190,28 @@ matrix &parser_var::mat(const char matrix_string[]) {
 }
 
 double parser_var::num(const char num_string[]) {
+    double number;
     try {
-        return number_parse(num_string, NULL);
+        number = number_parse(num_string, NULL);
     } catch (error_parse err) {
         throw err;
     }
+    switch(var_type) {
+        case PARSER_VAR_NUMBER:
+            delete number_part;
+            number_part = NULL;
+            break;
+        case PARSER_VAR_MATRIX:
+            delete matrix_part;
+            matrix_part = NULL;
+            break;
+    }
+
+    var_type = PARSER_VAR_NUMBER;
+    number_part = new double;
+    *number_part = number;
+
+    return *number_part;
 }
 
 parser_var operator + (const parser_var &a, const parser_var &b) {
@@ -473,6 +490,135 @@ parser_var operator / (const double n, const parser_var &a) {
 }
 
 
+extern parser_var operator ^ (const parser_var &a, const parser_var &b) {
+    parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (
+        a.type() == PARSER_VAR_OPERATOR ||
+        a.type() == PARSER_VAR_FUNCTION ||
+        b.type() == PARSER_VAR_OPERATOR ||
+        b.type() == PARSER_VAR_FUNCTION
+    ) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+    // Provjeri je li eksponent broj
+    if (b.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrix cannot be an exponent");
+    }
+    // Provjeri je li baza broj
+    else if (a.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrix cannot be potentiated");
+    }
+    else if (a.type() == PARSER_VAR_NUMBER && b.type() == PARSER_VAR_NUMBER) {
+        int exp = (int)b.num();             // Eksponent
+        int exp_prefix = exp < 0 ? -1 : 1;  // Predznak eksponenta
+        double temp_result = 1;             // Rezultat nakon fora
+        int i;                              // Brojac
+        // Ako eksponent nije cijeli broj
+        if (exp != b.num()) {
+            throw parser_var::error_calculation("Sorry, but only whole numbers are supported as an exponent");
+        }
+        // Ako je predznak eksponente - makni ga
+        exp = exp < 0 ? -exp : exp;
+        // Izracunaj rezultat
+        for (i = 0; i < exp; i++) {
+            temp_result *= a.num();
+        }
+        // Ako je predznak bio izracunaj 1 / temp_result
+        if (exp_prefix == -1) {
+            result.num(1.0 / temp_result);
+        } else {
+            result.num((double)temp_result);
+        }
+    } else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
+
+    return result;
+}
+extern parser_var operator ^ (const parser_var &a, const double n) {
+    parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
+    // Provjeri je li baza broj
+    if (a.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrix cannot be potentiated");
+    }
+    else if (a.type() == PARSER_VAR_NUMBER) {
+        int exp = (int)n;                   // Eksponent
+        int exp_prefix = exp < 0 ? -1 : 1;  // Predznak eksponenta
+        double temp_result = 1;             // Rezultat nakon fora
+        int i;                              // Brojac
+        // Ako eksponent nije cijeli broj
+        if (exp != n) {
+            throw parser_var::error_calculation("Sorry, but only whole numbers are supported as an exponent");
+        }
+        // Ako je predznak eksponente - makni ga
+        exp = exp < 0 ? -exp : exp;
+        // Izracunaj rezultat
+        for (i = 0; i < exp; i++) {
+            temp_result *= a.num();
+        }
+        // Ako je predznak bio izracunaj 1 / temp_result
+        if (exp_prefix == -1) {
+            result.num(1.0 / temp_result);
+        } else {
+            result.num((double)temp_result);
+        }
+    } else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
+
+    return result;
+}
+extern parser_var operator ^ (const double n, const parser_var &a) {
+    parser_var result; // Rezultat izračuna
+
+    // Ako je u varijabli funkcija ili operator, baci grešku. Tip funkcija i operator
+    // su namjenjeni isključivo internu uporabu unutar parsera, te je stoga računanje nemoguće
+    if (a.type() == PARSER_VAR_OPERATOR || a.type() == PARSER_VAR_FUNCTION) {
+        throw parser_var::error_calculation("Variables of type operator/function are for internal use only");
+    }
+
+    // Provjeri je li eksponent broj
+    if (a.type() == PARSER_VAR_MATRIX) {
+        throw parser_var::error_calculation("Matrix cannot be an exponent");
+    }
+    else if (a.type() == PARSER_VAR_NUMBER) {
+        int exp = (int)a.num();             // Eksponent
+        int exp_prefix = exp < 0 ? -1 : 1;  // Predznak eksponenta
+        double temp_result = 1;             // Rezultat nakon fora
+        int i;                              // Brojac
+        // Ako eksponent nije cijeli broj
+        if (exp != a.num()) {
+            throw parser_var::error_calculation("Sorry, but only whole numbers are supported as an exponent");
+        }
+        // Ako je predznak eksponente - makni ga
+        exp = exp < 0 ? -exp : exp;
+        // Izracunaj rezultat
+        for (i = 0; i < exp; i++) {
+            temp_result *= n;
+        }
+        // Ako je predznak bio izracunaj 1 / temp_result
+        if (exp_prefix == -1) {
+            result.num(1.0 / temp_result);
+        } else {
+            result.num(temp_result);
+        }
+    } else {
+        throw parser_var::error_calculation("One of variables is undefined");
+    }
+
+    return result;
+}
+
 
 parser_var &parser::variable(const char name[])  {
     parser_var *var_ptr = variables;
@@ -734,9 +880,9 @@ parser_var &parser::calculate(const char expression[]) {
     int number_is_next = 1;
     int number_prefix = 1;
     const char *number_string_start = expression;
-    operator_stack = NULL;
-    temp_stack = NULL;
-    output_queue = NULL;
+
+    // Počisti stack/queue-ove ak je ostalo neš od prošlog računa
+    clear_all_stacks();
 
     for (length = 0; expression[length] != '\0'; length++);
 
@@ -944,18 +1090,21 @@ parser_var &parser::calculate(const char expression[]) {
             case PARSER_VAR_MATRIX:
                 add_to_temp_stack(var_ptr);
                 break;
+            case PARSER_VAR_UNDEFINED:
+                throw error_calculation("One of the variables is undefined");
+                break;
             // Ako je token operator
             case PARSER_VAR_OPERATOR:
                 parser_var *var_1, *var_2;
                 // Ako stack operanada nije NULL uzmi operand 1 sa njega
                 if (temp_stack == NULL) {
-                    throw error_calculation("Something is wrong with operands 1");
+                    throw error_calculation("Something is wrong with operands");
                 } else {
                     var_1 = pop_from_temp_stack();
                 }
                 // Ako stack operanada nije NULL uzmi operand 2 sa njega
                 if (temp_stack == NULL) {
-                    throw error_calculation("Something is wrong with operands 2");
+                    throw error_calculation("Something is wrong with operands");
                 } else {
                     var_2 = pop_from_temp_stack();
                 }
@@ -1045,17 +1194,38 @@ parser_var &parser::calculate(const char expression[]) {
                                             var_2->mat().trans()
                                         );
                                         *res_ptr = var_2_trans;
+                                        delete var_1;
+                                        delete var_2;
                                         add_to_temp_stack(res_ptr);
                                     } else {
+                                        delete var_1;
+                                        delete var_2;
+                                        delete res_ptr;
                                         throw error_calculation("Function TRANS can only be used on matrices");
                                     }
                                     break;
                                 default:
+                                    delete var_1;
+                                    delete var_2;
+                                    delete res_ptr;
                                     throw error_calculation("Internal error, function not found");
                                     break;
                             }
                         } else {
-                            // Onda je broj i treba izračunat potenciju -- NIJE GOTOVO
+                            // Probaj izračunat
+                            try {
+                                *res_ptr = (*var_2) ^ (*var_1);
+                            } catch (calculator_error err) {
+                                // Ako račun nije uspio, pobriši nove varijable i vrati grešku
+                                delete var_1;
+                                delete var_2;
+                                delete res_ptr;
+                                throw error_calculation(err.info());
+                            }
+                            // Uspjelo je pa spremi rezultat
+                            delete var_1;
+                            delete var_2;
+                            add_to_temp_stack(res_ptr);
                         }
                         break;
                 }

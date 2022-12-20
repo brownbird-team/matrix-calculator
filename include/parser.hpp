@@ -258,6 +258,10 @@ extern parser_var operator * (const double n, const parser_var &a);
 extern parser_var operator / (const parser_var &a, const parser_var &b);
 extern parser_var operator / (const parser_var &a, const double n);
 extern parser_var operator / (const double n, const parser_var &a);
+// Prototipi operatora ^
+extern parser_var operator ^ (const parser_var &a, const parser_var &b);
+extern parser_var operator ^ (const parser_var &a, const double n);
+extern parser_var operator ^ (const double n, const parser_var &a);
 
 
 // Kodovi operatora parsera
@@ -270,36 +274,57 @@ extern parser_var operator / (const double n, const parser_var &a);
 #define PARSER_OPERATOR_CLS   7         // Zatvorena zagrada
 
 // Kodovi funkcija parsera
-#define PARSER_FUNCTION_TRANS 0
+#define PARSER_FUNCTION_TRANS 0         // Transponiranje matrice, dostupno samo za matrice
 
 class parser {
     private:
-        parser_var *variables;       // Pointer na prvu varijablu u listi definiranih varijabli
-        parser_var res_var;          // Varijabla u koju se sprema rezultat operacije
+        parser_var *variables;          // Pointer na prvu varijablu u listi definiranih varijabli
+        parser_var res_var;             // Varijabla u koju se sprema rezultat operacije
 
-        parser_var *operator_stack;
-        parser_var *output_queue;
-        parser_var *temp_stack;
+        parser_var *operator_stack;     // Pointer na stack koji se koristi prilikom pretvorne u RPN
+        parser_var *output_queue;       // Pointer na queue u koji se sprema rezultat pretvorbe u RPN
+        parser_var *temp_stack;         // Pointer na stack koji se koristi pri izračunavanju izraza pohranjenog u queueu
 
+        // Dodaj operator na operator stack
         parser_var *add_to_stack(const int operator_code);
+        // Dobavi operator sa operator_stacka
         parser_var *pop_from_stack();
 
+        // Dodaj operator u output_queue
         parser_var *add_operator_to_queue(const int operator_code);
+        // Dodaj funkciju u output_queue
         parser_var *add_function_to_queue(const int function_code);
+        // Dodaj parser_var objekt u output_queue
+        // funkcija dodaje TAJ objekt, što znači da modificira njegov next_var property
         parser_var *add_variable_to_queue(parser_var *new_var_ptr);
+        // Dobavi varijablu sa početka queuea
         parser_var *pop_from_queue();
 
+        // Dodaj parser_var objekt na temp_stack
+        // funkcija dodaje TAJ objekt, što znači da modificira njegov next_var property
         parser_var *add_to_temp_stack(parser_var *new_var_ptr);
+        // Dobavi varijablu sa temp_stacka
         parser_var *pop_from_temp_stack();
         
+        // Pronađi parser varijablu danog imena, ako je definirana vrati pointer na nju
+        // ako nije vrati NULL
         parser_var *find_variable(const char *name, const char *name_end);
 
+        // Provjeri ima li išta u jednom od internih stack/queue-ova, ako ima oslobodi svu
+        // memoriju koju zauzimaju i postavi sve stack/queue pointere na NULL
         void clear_all_stacks();
 
     public:
         // Default constructor
         parser() {
             variables = NULL;
+            operator_stack = NULL;
+            temp_stack = NULL;
+            output_queue = NULL;
+        }
+        // Destructor
+        ~parser() {
+            clear_all_stacks();
         }
         // Ako ne postoji kreiraj varijablu, zatim vrati referencu na istu
         parser_var &variable(const char name[]);
