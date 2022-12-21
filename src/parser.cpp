@@ -621,6 +621,7 @@ extern parser_var operator ^ (const double n, const parser_var &a) {
 
 
 parser_var &parser::variable(const char name[])  {
+    int i;
     parser_var *var_ptr = variables;
 
     // Ako već postoji varijabla sa danim imenom vrati referencu na nju
@@ -631,6 +632,14 @@ parser_var &parser::variable(const char name[])  {
             return *var_ptr;
 
         var_ptr = var_ptr->next_var;
+    }
+
+    // Testiraj je li ime varijable ispravno
+    if (isdigit(name[0]))
+        throw error_invalid("Variable name cannot begin with digit");
+    for (i = 0; name[i] != '\0'; i++) {
+        if (!isdigit(name[i]) && !isupper(name[i]) && !islower(name[i]))
+            throw error_invalid("Variable name is invalid, it can only contain letters and numbers");
     }
     
     // Ako varijabla ne postoji kreiraj je i vrati referencu na nju
@@ -677,6 +686,17 @@ void parser::del_variable(const char name[]) {
     }
 }
 
+void parser::del_all_variables() {
+    while (1) {
+        if (variables == NULL)
+            break;
+        
+        parser_var *var_ptr = variables;
+        variables = variables->next_var;
+        delete var_ptr;
+    }
+}
+
 int parser::length() {
     int counter = 0;
     parser_var *var_ptr = variables;
@@ -699,6 +719,7 @@ parser_var &parser::operator [] (int index) {
         if (counter == index)
             return *var_ptr;
         var_ptr = var_ptr->next_var;
+        ++counter;
     }
 }
 

@@ -140,6 +140,14 @@ class parser_var {
         inline int type() const {
             return var_type;
         }
+        // Ako je ime varijable definirano vrati ga
+        inline const char *name() {
+            if (variable_name == NULL) {
+                throw error_undefined("Variable name is undefined");
+            } else {
+                return variable_name;
+            }
+        }
         // Provjeri je li vrijednost varijable definirana
         inline int is_defined() const {
             return (var_type != PARSER_VAR_UNDEFINED) ? 1 : 0;
@@ -325,11 +333,14 @@ class parser {
         // Destructor
         ~parser() {
             clear_all_stacks();
+            del_all_variables();
         }
         // Ako ne postoji kreiraj varijablu, zatim vrati referencu na istu
         parser_var &variable(const char name[]);
         // Obriši varijablu danog imena
         void del_variable(const char name[]);
+        // Obriši sve varijable
+        void del_all_variables();
         // Broj kreiranih varijabli parsera
         int length();
         // Izračunaj izraz
