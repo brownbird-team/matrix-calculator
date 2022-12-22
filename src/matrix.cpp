@@ -242,7 +242,7 @@ matrix operator * (const matrix &a, const matrix &b) {
 
 matrix operator * (const double n, const matrix &b) {
     int i, j;
-    matrix result(b.cols, b.rows);
+    matrix result(b.rows, b.cols);
 
     for (i = 1; i <= b.rows; i++) {
         for (j = 1; j <= b.cols; j++) {
