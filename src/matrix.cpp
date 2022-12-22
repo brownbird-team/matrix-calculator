@@ -95,6 +95,8 @@ int matrix::is_ortogonal() {
 }
 int matrix::is_simetrical() {
     int rez = 1;
+    if (rows != cols)
+        return 0;
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < cols; j++) {
             if(mat_ptr[i][j] != mat_ptr[j][i]) {
@@ -106,6 +108,8 @@ int matrix::is_simetrical() {
 }
 int matrix::is_antisimetrical() {
     int rez = 1;
+    if (rows != cols)
+        return 0;
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < cols; j++) {
             if(mat_ptr[i][j] != -mat_ptr[j][i]) {
