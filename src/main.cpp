@@ -57,11 +57,11 @@ int main() {
             cout << "- del <variable>      -- delete variable of given name\n";
             cout << "- variables           -- list all existing variables\n";
             cout << "- print <variable>    -- show variable content\n";
-            cout << "- analyze <variable>  -- analyze variable of given name\n";
+            cout << "- analyse <variable>  -- analyze variable of given name\n";
             cout << "- calc <expression>   -- calculate given expression\n";
             cout << "- result              -- show result of last operation\n";
-            cout << "- save <variable>     -- Move result of calculation into variable\n";
-            cout << "- save <to> <from>    -- save value of from into to\n";
+            cout << "- saveres <variable>  -- Move result of calculation into variable\n";
+            cout << "- save <from> <to>    -- save value of from into to\n";
             cout << "- exit                -- exit calculator\n\n";
         } else if (strcmp(input, "exit") == 0) {
             cout << "Exiting calculator\nBye\n\n";
@@ -155,8 +155,63 @@ int main() {
             } catch (calculator_error err) {
                 cout << "Error: " << err.info() << "\n\n";
             }
+        } else if (strncmp(input, "saveres ", 8) == 0) {
+            try {
+                calc.variable(input + 8) = calc.result();
+                cout << "Saving result of last calculation into " << input + 8 << "\n\n";
+            } catch (calculator_error err) {
+                cout << "Error: " << err.info() << "\n\n";
+            }
+        } else if (strncmp(input, "save ", 5) == 0) {
+            int i;
+            char *arg1, *arg2;
+            int space_cnt = 0;
+            int length = strlen(input);
 
-        } else {
+            for (i = 0; i < length; i++) {
+                if (input[i] == ' ' && space_cnt == 0) {
+                    ++space_cnt;
+                    arg1 = input + i + 1;
+                    input[i] = '\0';
+                }
+                if (input[i] == ' ' && space_cnt == 1) {
+                    ++space_cnt;
+                    arg2 = input + i + 1;
+                    input[i] = '\0';
+                }
+                if (input[i] == ' ' && space_cnt == 2) {
+                    input[i] = '\0';
+                    break;
+                } 
+            }
+
+            try {
+                calc.variable(arg2) = calc.variable(arg1);
+                cout << "Saving content of variable " << arg1 << " into " << arg2 << "\n\n";
+            } catch (calculator_error err) {
+                cout << "Error: " << err.info() << "\n\n";
+            }
+        } else if (strncmp(input, "analyse ", 8) == 0) {
+            switch (calc.variable(input + 8).type()) {
+                case PARSER_VAR_UNDEFINED:
+                    cout << "Variable is undefined\n\n";
+                    break;
+                case PARSER_VAR_NUMBER:
+                    cout << "Variable is a number, nothing to analyse\n\n";
+                    break;
+                case PARSER_VAR_MATRIX:
+                    cout << "Analysing matrix:\n";
+                    cout << "- Square matrix:     " << ((calc.variable(input + 8).mat().is_squared()) ? "True" : "False") << "\n";
+                    cout << "- Null:              " << ((calc.variable(input + 8).mat().is_nul()) ? "True" : "False") << "\n";
+                    cout << "- Identity:          " << ((calc.variable(input + 8).mat().is_identity()) ? "True" : "False") << "\n";
+                    cout << "- Upper triangular:  " << ((calc.variable(input + 8).mat().is_upper_triangular()) ? "True" : "False") << "\n";
+                    cout << "- Lower triangular:  " << ((calc.variable(input + 8).mat().is_lower_triangular()) ? "True" : "False") << "\n";
+                    cout << "- Diagonal:          " << ((calc.variable(input + 8).mat().is_diagonal()) ? "True" : "False") << "\n";
+                    cout << "- Simetrical:        " << ((calc.variable(input + 8).mat().is_simetrical()) ? "True" : "False") << "\n";
+                    cout << "- Antisimetrical:    " << ((calc.variable(input + 8).mat().is_antisimetrical()) ? "True" : "False") << "\n";
+                    cout << "- Ortogonal:         " << ((calc.variable(input + 8).mat().is_ortogonal()) ? "True" : "False") << "\n";
+            }
+        } else if (strlen(input) > 0) {
             cout << "Command not found\n\n";
         }
     }
