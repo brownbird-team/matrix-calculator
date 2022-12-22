@@ -52,7 +52,7 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # Postavi zastavice općenito
-CPPFLAGS := $(INC_FLAGS)
+CPPFLAGS := $(INC_FLAGS) -static-libgcc -static-libstdc++
 # Postavi kompajlere za C++ i C
 CXX := g++
 CC := gcc
