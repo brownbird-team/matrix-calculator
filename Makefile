@@ -54,7 +54,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 # Postavi zastavice općenito
 CPPFLAGS := $(INC_FLAGS)
 # Postavi zastavice linkera
-LDFLAGS := -static-libgcc -static-libstdc++
+LDFLAGS := -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread
 # Postavi kompajlere za C++ i C
 CXX := g++
 CC := gcc
